@@ -1,0 +1,107 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  COMPOSER_CACHE_DIR: ~/.composer/cache
+
+jobs:
+  backend-test:
+    name: Backend Tests (Pest)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: kasir_skanilan_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, redis, bcmath
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Dependencies
+        working-directory: ./backend
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy Env
+        working-directory: ./backend
+        run: cp .env.example .env || cp .env.testing .env
+
+      - name: Generate Key
+        working-directory: ./backend
+        run: php artisan key:generate
+
+      - name: Run Migrations
+        working-directory: ./backend
+        run: php artisan migrate --force
+
+      - name: Run Tests
+        working-directory: ./backend
+        run: php artisan test --coverage --min=50
+
+      - name: Lint (Pint)
+        working-directory: ./backend
+        run: php vendor/bin/pint --test
+
+  firmware-build:
+    name: Firmware Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build Firmware
+        working-directory: ./firmware
+        run: pio run -e nodemcuv3
+        continue-on-error: true  # May fail without hardware libs in CI
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [backend-test, firmware-build]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging Server
+        run: echo "Deploy to staging via SSH/rsync/Docker"
+        # Add your staging deployment commands here
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [backend-test, firmware-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Production VPS
+        run: echo "Deploy to production VPS via Docker Compose"
+        # Add your production deployment commands here
