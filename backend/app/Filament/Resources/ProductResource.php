@@ -23,7 +23,14 @@ class ProductResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('kasir_id', auth()->id());
+        $query = parent::getEloquentQuery();
+
+        // Admin sees all products, kasir sees only their own
+        if (auth()->user()?->hasRole('admin')) {
+            return $query;
+        }
+
+        return $query->where('kasir_id', auth()->id());
     }
 
     public static function form(Form $form): Form
@@ -59,6 +66,9 @@ class ProductResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),
+                Forms\Components\Hidden::make('kasir_id')
+                    ->default(auth()->id())
+                    ->dehydrated(fn () => ! auth()->user()?->hasRole('admin')),
             ]),
         ]);
     }
