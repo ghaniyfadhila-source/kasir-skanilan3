@@ -2,23 +2,31 @@
 
 namespace App\Livewire\Kasir;
 
-use App\Models\Product;
-use App\Models\Transaction;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class KasirPos extends Component
 {
     public $products = [];
+
     public $cart = [];
+
     public $total = 0;
+
     public $selectedProductId = null;
+
     public $qty = 1;
+
     public $transactionId = null;
+
     public $status = 'idle'; // idle, pending, processing, success, failed
+
     public $message = '';
+
     public $balanceBefore = 0;
+
     public $balanceAfter = 0;
+
     public $cardInfo = null;
 
     public function mount()
@@ -40,10 +48,13 @@ class KasirPos extends Component
     public function addToCart($productId)
     {
         $product = collect($this->products)->firstWhere('id', $productId);
-        if (!$product) return;
+        if (! $product) {
+            return;
+        }
 
         if (($product['stock'] ?? 0) <= 0) {
             $this->dispatch('notify', message: 'Stok habis', type: 'error');
+
             return;
         }
 
@@ -51,6 +62,7 @@ class KasirPos extends Component
         if ($existing) {
             if ($existing['qty'] >= $product['stock']) {
                 $this->dispatch('notify', message: 'Stok tidak mencukupi', type: 'error');
+
                 return;
             }
             $existing['qty']++;
@@ -76,9 +88,11 @@ class KasirPos extends Component
 
     public function updateQty($index, $qty)
     {
-        if (!isset($this->cart[$index])) return;
+        if (! isset($this->cart[$index])) {
+            return;
+        }
         $product = collect($this->products)->firstWhere('id', $this->cart[$index]['product_id']);
-        if (!$product || $qty > $product['stock']) {
+        if (! $product || $qty > $product['stock']) {
             $qty = $product['stock'] ?? 1;
         }
         $this->cart[$index]['qty'] = max(1, $qty);
@@ -95,13 +109,14 @@ class KasirPos extends Component
     {
         if (empty($this->cart)) {
             $this->dispatch('notify', message: 'Keranjang kosong', type: 'error');
+
             return;
         }
 
         $this->status = 'pending';
         $this->message = 'Menunggu pembeli tap kartu...';
 
-        $items = array_map(fn($i) => [
+        $items = array_map(fn ($i) => [
             'product_id' => $i['product_id'],
             'name' => $i['name'],
             'qty' => $i['qty'],
@@ -141,7 +156,7 @@ class KasirPos extends Component
             $this->cart = [];
             $this->total = 0;
             $this->dispatch('notify', message: 'Transaksi berhasil', type: 'success');
-            
+
             // Auto reset after 3 seconds
             $this->dispatch('auto-reset');
         } elseif ($data['status'] === 'failed') {
@@ -158,8 +173,10 @@ class KasirPos extends Component
 
     public function cancelTransaction()
     {
-        if (!$this->transactionId) return;
-        
+        if (! $this->transactionId) {
+            return;
+        }
+
         $response = $this->callApi("/api/transactions/{$this->transactionId}/cancel", 'POST');
         if ($response['success']) {
             $this->resetTransaction();

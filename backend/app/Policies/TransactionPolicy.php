@@ -14,7 +14,10 @@ class TransactionPolicy
 
     public function view(User $user, Transaction $transaction): bool
     {
-        if ($user->hasRole('admin')) return true;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
         return $user->hasRole('kasir') && $user->device_id === $transaction->device_id;
     }
 
@@ -25,7 +28,10 @@ class TransactionPolicy
 
     public function update(User $user, Transaction $transaction): bool
     {
-        if ($user->hasRole('admin')) return true;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
         return $user->hasRole('kasir') && $user->device_id === $transaction->device_id;
     }
 

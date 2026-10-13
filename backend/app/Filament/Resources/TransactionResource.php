@@ -9,19 +9,23 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+
     protected static ?string $navigationGroup = 'Admin';
+
     protected static ?int $navigationSort = 2;
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with(['device', 'rfidCard']);
 
-        if (!auth()->user()?->hasRole('admin')) {
+        if (! auth()->user()?->hasRole('admin')) {
             $query->where('device_id', auth()->user()->device_id);
         }
 

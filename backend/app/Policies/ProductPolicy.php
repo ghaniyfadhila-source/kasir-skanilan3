@@ -14,7 +14,10 @@ class ProductPolicy
 
     public function view(User $user, Product $product): bool
     {
-        if ($user->hasRole('admin')) return true;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
         return $user->hasRole('kasir') && $user->id === $product->kasir_id;
     }
 
@@ -25,13 +28,19 @@ class ProductPolicy
 
     public function update(User $user, Product $product): bool
     {
-        if ($user->hasRole('admin')) return true;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
         return $user->hasRole('kasir') && $user->id === $product->kasir_id;
     }
 
     public function delete(User $user, Product $product): bool
     {
-        if ($user->hasRole('admin')) return true;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
         return $user->hasRole('kasir') && $user->id === $product->kasir_id;
     }
 }

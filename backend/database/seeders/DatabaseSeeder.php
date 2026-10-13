@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Device;
 use App\Models\Product;
 use App\Models\RfidCard;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -76,13 +76,13 @@ class DatabaseSeeder extends Seeder
     private function createDevice(): void
     {
         $kasir = User::where('email', 'kasir@skanilan.local')->first();
-        
+
         Device::firstOrCreate(
             ['device_id' => 'ESP8266_DEMO_001'],
             [
                 'name' => 'Console Kasir 1',
                 'status' => 'active',
-                'api_token' => 'dev_' . bin2hex(random_bytes(32)),
+                'api_token' => 'dev_'.bin2hex(random_bytes(32)),
                 'firmware_version' => '1.0.0',
                 'kasir_id' => $kasir?->id,
             ]
@@ -92,7 +92,9 @@ class DatabaseSeeder extends Seeder
     private function createProducts(): void
     {
         $kasir = User::where('email', 'kasir@skanilan.local')->first();
-        if (!$kasir) return;
+        if (! $kasir) {
+            return;
+        }
 
         $products = [
             ['name' => 'Nasi Goreng', 'price' => 15000, 'stock' => 50, 'category' => 'Makanan'],
@@ -116,7 +118,9 @@ class DatabaseSeeder extends Seeder
     private function createRfidCards(): void
     {
         $admin = User::where('email', 'admin@skanilan.local')->first();
-        if (!$admin) return;
+        if (! $admin) {
+            return;
+        }
 
         $cards = [
             ['uid' => 'A1B2C3D4', 'user_name' => 'Budi Santoso', 'balance' => 50000],

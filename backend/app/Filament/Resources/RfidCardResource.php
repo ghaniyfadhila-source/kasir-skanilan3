@@ -8,14 +8,17 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
 
 class RfidCardResource extends Resource
 {
     protected static ?string $model = RfidCard::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?string $navigationGroup = 'Admin';
+
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
@@ -122,7 +125,7 @@ class RfidCardResource extends Resource
                     ->label('Aktifkan')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (RfidCard $record) => !$record->is_active)
+                    ->visible(fn (RfidCard $record) => ! $record->is_active)
                     ->action(fn (RfidCard $record) => $record->update(['is_active' => true])),
             ])
             ->bulkActions([

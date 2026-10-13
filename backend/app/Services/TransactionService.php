@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\TransactionCompleted;
+use App\Models\Device;
 use App\Models\RfidCard;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +12,7 @@ class TransactionService
 {
     public function processTap(Transaction $transaction, string $uid): array
     {
-        if (!$transaction->isPending()) {
+        if (! $transaction->isPending()) {
             return [
                 'success' => false,
                 'message' => 'Transaksi tidak dalam status pending',
@@ -20,6 +22,7 @@ class TransactionService
 
         if ($transaction->isExpired()) {
             $transaction->markCancelled();
+
             return [
                 'success' => false,
                 'message' => 'Transaksi kadaluarsa',
@@ -29,7 +32,7 @@ class TransactionService
 
         $card = RfidCard::where('uid', $uid)->first();
 
-        if (!$card) {
+        if (! $card) {
             return [
                 'success' => false,
                 'message' => 'Kartu tidak terdaftar',
@@ -37,7 +40,7 @@ class TransactionService
             ];
         }
 
-        if (!$card->is_active) {
+        if (! $card->is_active) {
             return [
                 'success' => false,
                 'message' => 'Kartu tidak aktif',
@@ -45,7 +48,7 @@ class TransactionService
             ];
         }
 
-        if (!$card->hasSufficientBalance($transaction->total)) {
+        if (! $card->hasSufficientBalance($transaction->total)) {
             return [
                 'success' => false,
                 'message' => 'Saldo tidak mencukupi',
@@ -67,7 +70,7 @@ class TransactionService
                 'balance_after' => $balanceAfter,
             ]);
 
-            broadcast(new \App\Events\TransactionCompleted($transaction))->toOthers();
+            broadcast(new TransactionCompleted($transaction))->toOthers();
 
             return [
                 'success' => true,
@@ -87,7 +90,7 @@ class TransactionService
     }
 
     public function createPendingTransaction(
-        \App\Models\Device $device,
+        Device $device,
         array $items
     ): Transaction {
         $total = collect($items)->sum(fn ($i) => $i['subtotal']);

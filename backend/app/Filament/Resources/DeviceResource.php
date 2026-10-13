@@ -8,14 +8,17 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
 
 class DeviceResource extends Resource
 {
     protected static ?string $model = Device::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-cpu-chip';
+
     protected static ?string $navigationGroup = 'Device Management';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -120,7 +123,7 @@ class DeviceResource extends Resource
                 Action::make('view_transactions')
                     ->label('Transaksi')
                     ->icon('heroicon-o-document-text')
-                    ->url(fn (Device $record) => \App\Filament\Resources\TransactionResource::getUrl('index', ['device' => $record->device_id])),
+                    ->url(fn (Device $record) => TransactionResource::getUrl('index', ['device' => $record->device_id])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

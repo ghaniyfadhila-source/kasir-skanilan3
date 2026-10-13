@@ -9,15 +9,19 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
     protected static ?string $navigationGroup = 'Kasir';
+
     protected static ?int $navigationSort = 1;
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->where('kasir_id', auth()->id());
     }

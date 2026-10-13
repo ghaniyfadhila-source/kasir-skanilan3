@@ -8,7 +8,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Device extends Model
 {
-    use HasFactory, HasApiTokens;
+    use HasApiTokens, HasFactory;
 
     protected $fillable = [
         'device_id',
@@ -39,7 +39,7 @@ class Device extends Model
 
     public function generateApiToken(): string
     {
-        return 'dev_' . bin2hex(random_bytes(32));
+        return 'dev_'.bin2hex(random_bytes(32));
     }
 
     public function isOnline(): bool

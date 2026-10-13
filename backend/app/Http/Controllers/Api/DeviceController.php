@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Device;
-use App\Models\Transaction;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class DeviceController extends Controller
 {
@@ -57,7 +55,7 @@ class DeviceController extends Controller
             ->latest()
             ->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json([
                 'success' => true,
                 'has_pending' => false,
@@ -92,7 +90,7 @@ class DeviceController extends Controller
             ->latest()
             ->first();
 
-        if (!$pendingTransaction) {
+        if (! $pendingTransaction) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tidak ada transaksi menunggu',

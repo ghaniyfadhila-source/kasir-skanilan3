@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TransactionCancelled;
+use App\Events\TransactionCreated;
 use App\Http\Controllers\Controller;
+use App\Models\Device;
+use App\Models\Product;
 use App\Models\Transaction;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -22,13 +26,13 @@ class TransactionController extends Controller
             'items.*.qty' => 'required|integer|min:1',
         ]);
 
-        $device = \App\Models\Device::where('device_id', $request->device_id)->firstOrFail();
+        $device = Device::where('device_id', $request->device_id)->firstOrFail();
 
         $items = [];
         $total = 0;
 
         foreach ($request->items as $item) {
-            $product = \App\Models\Product::findOrFail($item['product_id']);
+            $product = Product::findOrFail($item['product_id']);
             $subtotal = $product->price * $item['qty'];
             $items[] = [
                 'product_id' => $product->id,
@@ -51,7 +55,7 @@ class TransactionController extends Controller
             'expires_at' => now()->addSeconds(30),
         ]);
 
-        broadcast(new \App\Events\TransactionCreated($transaction))->toOthers();
+        broadcast(new TransactionCreated($transaction))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -68,7 +72,7 @@ class TransactionController extends Controller
     {
         $this->authorize('update', $transaction);
 
-        if (!$transaction->isPending()) {
+        if (! $transaction->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Transaksi tidak bisa dibatalkan',
@@ -77,7 +81,7 @@ class TransactionController extends Controller
 
         $transaction->markCancelled();
 
-        broadcast(new \App\Events\TransactionCancelled($transaction))->toOthers();
+        broadcast(new TransactionCancelled($transaction))->toOthers();
 
         return response()->json(['success' => true]);
     }
