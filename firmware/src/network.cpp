@@ -1,4 +1,6 @@
 #include "network.h"
+#include <functional>
+#include <WiFiManager.h>
 
 NetworkManager::NetworkManager() {}
 
@@ -39,7 +41,7 @@ bool NetworkManager::isWiFiConnected() const {
     return WiFi.status() == WL_CONNECTED;
 }
 
-bool NetworkManager::isWSConnected() const {
+bool NetworkManager::isWSConnected() {
     return webSocket.isConnected();
 }
 
@@ -59,8 +61,44 @@ void NetworkManager::connectWiFi() {
 void NetworkManager::connectWebSocket() {
     if (!isWiFiConnected() || deviceToken.isEmpty()) return;
     
-    String wsPath = wsUrl + "/app/" + String(REVERB_APP_KEY) + "?protocol=7&client=js&version=8.4.0&flash=false";
-    webSocket.begin(wsPath.c_str());
+    // Parse wsUrl to extract host and port
+    // wsUrl format: "wss://your-domain.com" or "ws://localhost:8080"
+    String url = wsUrl;
+    String host = "";
+    int port = 443;
+    String path = "/app/" + String(REVERB_APP_KEY) + "?protocol=7&client=js&version=8.4.0&flash=false";
+    
+    // Remove protocol
+    if (url.startsWith("wss://")) {
+        url = url.substring(6);
+        port = 443;
+    } else if (url.startsWith("ws://")) {
+        url = url.substring(5);
+        port = 80;
+    }
+    
+    // Extract host and port
+    int slashIndex = url.indexOf('/');
+    if (slashIndex > 0) {
+        host = url.substring(0, slashIndex);
+    } else {
+        host = url;
+    }
+    
+    // Check for port in host
+    int colonIndex = host.indexOf(':');
+    if (colonIndex > 0) {
+        port = host.substring(colonIndex + 1).toInt();
+        host = host.substring(0, colonIndex);
+    }
+    
+    // For wss, use SSL
+    if (url.startsWith("wss://") || port == 443) {
+        webSocket.beginSSL(host.c_str(), port, path.c_str());
+    } else {
+        webSocket.begin(host.c_str(), port, path.c_str());
+    }
+    
     webSocket.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->handleWebSocketEvent(type, payload, length);
     });

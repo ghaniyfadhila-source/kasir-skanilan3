@@ -1,6 +1,8 @@
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
+#include <Arduino.h>
+
 enum class DeviceState {
     BOOT,
     CONNECTING_WIFI,
@@ -20,7 +22,20 @@ struct TransactionData {
     String items;  // JSON string
     unsigned long expiresAt;
     bool hasPending = false;
+    float balanceBefore = 0;
+    float balanceAfter = 0;
 };
+
+// Forward declarations
+class HardwarePins;
+class NetworkManager;
+class DisplayManager;
+
+extern HardwarePins hw;
+extern NetworkManager net;
+extern DisplayManager display;
+extern String deviceId;
+extern String fwVersion;
 
 class StateMachine {
 public:

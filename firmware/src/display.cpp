@@ -1,4 +1,5 @@
 #include "display.h"
+#include "config.h"
 
 DisplayManager::DisplayManager(LiquidCrystal_I2C& lcdRef) : lcd(lcdRef) {}
 
@@ -44,6 +45,10 @@ void DisplayManager::showCustom(const char* line1, const char* line2) {
         writeCentered(1, line2);
     }
     currentLine2 = line2 ? line2 : "";
+}
+
+void DisplayManager::showCustom(const String& line1, const String& line2) {
+    showCustom(line1.c_str(), line2.c_str());
 }
 
 void DisplayManager::clear() {

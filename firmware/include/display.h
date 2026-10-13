@@ -18,6 +18,7 @@ public:
     void showNetError();
     void showTimeout();
     void showCustom(const char* line1, const char* line2 = "");
+    void showCustom(const String& line1, const String& line2 = "");
     void clear();
     
 private:

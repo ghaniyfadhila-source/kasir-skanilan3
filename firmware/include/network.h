@@ -10,6 +10,9 @@
 
 #include "config.h"
 
+// Forward declaration for deviceId from main.cpp
+extern String deviceId;
+
 class NetworkManager {
 public:
     NetworkManager();
@@ -18,14 +21,13 @@ public:
     void update();
     
     bool isWiFiConnected() const;
-    bool isWSConnected() const;
+    bool isWSConnected();
     
     bool registerDevice(const String& deviceId, const String& fwVersion);
     bool checkPendingTransaction(String& txId, float& total, String& items, unsigned long& expiresAt);
-    bool sendTap(const String& txId, const String& uid, bool& success, String& message, float& balanceBefore, float& balanceAfter);
+    bool sendTap(const String& txId, const String& uid, std::function<void(bool, String, float, float)> callback);
     void sendHeartbeat(int rssi, int freeHeap, int uptime);
     
-    void onWSMessage(WsMessageType type, uint8_t* payload, size_t length);
     void setWSMessageCallback(void (*callback)(const String& event, const JsonDocument& data));
     
     String getDeviceToken() const { return deviceToken; }

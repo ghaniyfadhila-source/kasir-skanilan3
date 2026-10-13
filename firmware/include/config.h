@@ -5,7 +5,8 @@
 #define WIFI_SSID "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 #define API_BASE_URL "https://your-domain.com/api"
-#define WS_URL "wss://your-domain.com/ws"
+#define WS_URL "wss://your-domain.com"
+#define REVERB_APP_KEY "your-reverb-app-key"
 #define DEVICE_ID "ESP8266_"  // Will append MAC address
 
 // ===== Pin Mapping (NodeMCU v3) =====

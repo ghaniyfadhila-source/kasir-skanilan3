@@ -31,6 +31,7 @@ public:
     void beepWarning();
     void beepStartup();
     void setLED(bool green, bool red);
+    void update();  // For non-blocking operations
     
 private:
     void writeLCD(int col, int row, const char* text);

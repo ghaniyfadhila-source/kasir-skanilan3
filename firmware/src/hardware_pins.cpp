@@ -1,4 +1,5 @@
 #include "hardware_pins.h"
+#include "config.h"
 
 HardwarePins::HardwarePins()
     : rfid(PIN_RFID_SS, PIN_RFID_RST),
@@ -14,7 +15,9 @@ void HardwarePins::init() {
 }
 
 void HardwarePins::initRFID() {
-    SPI.begin(PIN_RFID_SCK, PIN_RFID_MISO, PIN_RFID_MOSI, PIN_RFID_SS);
+    // ESP8266 hardware SPI pins are fixed: SCK=D5(GPIO14), MISO=D6(GPIO12), MOSI=D7(GPIO13), SS=D8(GPIO15)
+    // Just call begin() without pin arguments
+    SPI.begin();
     rfid.PCD_Init();
     rfid.PCD_SetAntennaGain(rfid.RxGain_max);
     Serial.println(F("RFID initialized"));
@@ -112,4 +115,8 @@ void HardwarePins::setLED(bool green, bool red) {
     } else {
         digitalWrite(LED_BUILTIN, HIGH); // OFF
     }
+}
+
+void HardwarePins::update() {
+    // For non-blocking operations if needed
 }
