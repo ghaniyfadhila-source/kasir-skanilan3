@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DeviceResource\Pages;
 use App\Models\Device;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -42,17 +43,20 @@ class DeviceResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('kasir_id')
                     ->label('Kasir')
-                    ->relationship('kasir', 'name')
+                    ->options(User::role('kasir')->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} ({$record->email})"),
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} ({$record->email})")
+                    ->placeholder('Pilih kasir (optional)'),
             ]),
             Forms\Components\Section::make('Token & Status')->schema([
                 Forms\Components\TextInput::make('api_token')
                     ->label('API Token')
                     ->disabled()
                     ->dehydrated(false)
-                    ->helperText('Token untuk autentikasi device'),
+                    ->copyable()
+                    ->copyMessage('Token disalin!')
+                    ->helperText('Token untuk autentikasi device. Dihasilkan otomatis saat create.'),
                 Forms\Components\TextInput::make('firmware_version')
                     ->label('Firmware Version')
                     ->disabled()
@@ -67,6 +71,16 @@ class DeviceResource extends Resource
                     ->dehydrated(false),
             ]),
         ]);
+    }
+
+    protected static function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (empty($data['api_token'])) {
+            $device = new Device;
+            $data['api_token'] = $device->generateApiToken();
+        }
+
+        return $data;
     }
 
     public static function table(Table $table): Table
