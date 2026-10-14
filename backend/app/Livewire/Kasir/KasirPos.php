@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Kasir;
 
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+#[Layout('components.layouts.app')]
 class KasirPos extends Component
 {
     public $products = [];
