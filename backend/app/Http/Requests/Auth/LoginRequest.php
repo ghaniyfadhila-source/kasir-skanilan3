@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
@@ -25,10 +26,14 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         if (! auth()->attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+            $this->getRateLimiter()->hit($this->getThrottleKey(), 60);
+
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
         }
+
+        $this->getRateLimiter()->clear($this->getThrottleKey());
     }
 
     public function ensureIsNotRateLimited(): void
@@ -39,17 +44,18 @@ class LoginRequest extends FormRequest
 
         throw ValidationException::withMessages([
             'email' => __('auth.throttle', [
-                'seconds' => $this->getRateLimiter()->availableIn(),
+                'seconds' => $this->getRateLimiter()->availableIn($this->getThrottleKey()),
+                'minutes' => ceil($this->getRateLimiter()->availableIn($this->getThrottleKey()) / 60),
             ]),
         ]);
     }
 
     public function hasTooManyLoginAttempts(): bool
     {
-        return $this->getRateLimiter()->tooManyAttempts($this->getThrottleKey());
+        return $this->getRateLimiter()->tooManyAttempts($this->getThrottleKey(), 5);
     }
 
-    public function getRateLimiter()
+    public function getRateLimiter(): RateLimiter
     {
         return app('limiter');
     }
