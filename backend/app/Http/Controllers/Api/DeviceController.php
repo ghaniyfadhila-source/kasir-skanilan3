@@ -101,9 +101,6 @@ class DeviceController extends Controller
 
         $pendingTransaction = $device->transactions()
             ->where('status', 'pending')
-            ->where(function ($q) {
-                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            })
             ->latest()
             ->first();
 
