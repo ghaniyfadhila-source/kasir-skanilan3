@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use Illuminate\Cache\RateLimiting\RateLimiter;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
