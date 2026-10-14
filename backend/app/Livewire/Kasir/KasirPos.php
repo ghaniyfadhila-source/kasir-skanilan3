@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Kasir;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -196,11 +198,28 @@ class KasirPos extends Component
         $this->cardInfo = null;
     }
 
-    private function callApi($url, $method = 'GET', $data = [])
+    private function callApi(string $url, string $method = 'GET', array $data = []): array
     {
-        // This would be replaced with actual HTTP client call
-        // For now, return mock - in real implementation use Http::withToken(...)
-        return ['success' => true, 'transaction' => ['id' => 1]];
+        $device = auth()->user()->device;
+        $token = $device?->api_token ?? '';
+
+        try {
+            $response = Http::withToken($token)
+                ->timeout(10)
+                ->retry(3, 100)
+                ->{$method}("{$this->baseUrl()}{$url}", $data);
+
+            return $response->json() ?? ['success' => false, 'message' => 'Invalid response'];
+        } catch (ConnectionException $e) {
+            return ['success' => false, 'message' => 'Tidak bisa terhubung ke server'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Terjadi kesalahan: '.$e->getMessage()];
+        }
+    }
+
+    private function baseUrl(): string
+    {
+        return config('app.url').'/api';
     }
 
     public function render()
