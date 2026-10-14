@@ -22,6 +22,11 @@ class RfidCard extends Model
         'is_active' => 'boolean',
     ];
 
+    public function setUidAttribute(string $value): void
+    {
+        $this->attributes['uid'] = strtoupper($value);
+    }
+
     public function registeredBy()
     {
         return $this->belongsTo(User::class, 'registered_by');
