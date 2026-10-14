@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        if (auth()->user()->hasRole('admin')) {
+            return redirect()->route('filament.admin.pages.dashboard');
+        }
+
+        return redirect()->route('kasir.pos');
+    }
+
     return redirect()->route('login');
 });
 
