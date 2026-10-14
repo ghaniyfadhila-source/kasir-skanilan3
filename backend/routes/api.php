@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('device')->group(function () {
     Route::post('register', [DeviceController::class, 'register']);
 
-    Route::middleware('auth:device')->group(function () {
+    Route::middleware('auth.device')->group(function () {
         Route::get('{device:device_id}/pending-transaction', [DeviceController::class, 'pendingTransaction']);
         Route::post('{device:device_id}/tap', [DeviceController::class, 'tap']);
         Route::post('{device:device_id}/heartbeat', [DeviceController::class, 'heartbeat']);

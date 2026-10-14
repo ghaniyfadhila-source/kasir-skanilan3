@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateDevice;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Providers\Filament\AdminPanelProvider;
@@ -26,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+        ]);
+
+        $middleware->alias([
+            'auth.device' => AuthenticateDevice::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

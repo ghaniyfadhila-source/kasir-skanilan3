@@ -47,6 +47,14 @@ class DeviceController extends Controller
 
     public function pendingTransaction(Request $request, Device $device)
     {
+        $authenticatedDevice = $request->get('authenticated_device');
+        if (! $authenticatedDevice || $authenticatedDevice->device_id !== $device->device_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $transaction = $device->transactions()
             ->where('status', 'pending')
             ->where(function ($q) {
@@ -76,6 +84,15 @@ class DeviceController extends Controller
 
     public function tap(Request $request, Device $device)
     {
+        $authenticatedDevice = $request->get('authenticated_device');
+        if (! $authenticatedDevice || $authenticatedDevice->device_id !== $device->device_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'code' => 'UNAUTHORIZED',
+            ], 403);
+        }
+
         $request->validate([
             'uid' => 'required|string|max:50',
         ]);
@@ -105,6 +122,14 @@ class DeviceController extends Controller
 
     public function heartbeat(Request $request, Device $device)
     {
+        $authenticatedDevice = $request->get('authenticated_device');
+        if (! $authenticatedDevice || $authenticatedDevice->device_id !== $device->device_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $request->validate([
             'rssi' => 'nullable|integer',
             'free_heap' => 'nullable|integer',

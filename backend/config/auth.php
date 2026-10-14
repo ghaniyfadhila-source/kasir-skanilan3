@@ -20,9 +20,8 @@ return [
             'provider' => 'users',
         ],
         'device' => [
-            'driver' => 'sanctum',
+            'driver' => 'session',
             'provider' => 'devices',
-            'hash' => false,
         ],
     ],
 
