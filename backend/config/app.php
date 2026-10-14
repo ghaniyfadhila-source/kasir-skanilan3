@@ -1,5 +1,10 @@
 <?php
 
+use App\Providers\AuthServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\ServiceProvider;
+
 return [
 
     'app_name' => 'Kasir Cashless Skanilan',
@@ -26,5 +31,16 @@ return [
     'sanctum' => [
         'stateful_domains' => env('SANCTUM_STATEFUL_DOMAINS', 'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1'),
     ],
+
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        // Package Service Providers...
+    ])->merge([
+        // Application Service Providers...
+        RouteServiceProvider::class,
+        AuthServiceProvider::class,
+        AdminPanelProvider::class,
+    ])->merge([
+        // Added Service Providers (Do not remove this line)...
+    ])->toArray(),
 
 ];
