@@ -12,21 +12,22 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <source ignoreIndirectDeprecations="true">
         <!--
             Laravel merges its own vendor/laravel/framework/config/database.php
             during boot, and that file touches PDO::MYSQL_ATTR_SSL_CA whenever
-            pdo_mysql is loaded (true on CI runners). PHP 8.5 deprecated the
+            pdo_mysql is loaded (the case on CI runners). PHP 8.5 deprecated the
             constant, so every test that opened a connection was reported as
             "deprecated" even though nothing in this project uses MySQL.
-            Deprecations are silenced for the suite; warnings and errors are not.
+
+            Deprecations raised by third-party code are therefore ignored, while
+            deprecations from app/ are still reported.
         -->
         <include>
             <directory>app</directory>
         </include>
     </source>
     <php>
-        <ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

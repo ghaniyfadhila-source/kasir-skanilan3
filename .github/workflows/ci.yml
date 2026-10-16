@@ -72,13 +72,11 @@ jobs:
       # environment, so setting them here would take the tests off their
       # in-memory configuration.
       #
-      # Real coverage is 29.5% (measured 2026-10-16). The floor sits below that so
-      # a regression still fails the build, while the untested bulk - Filament
-      # resource classes, policies and the kasir POS component - grows test by
-      # test.
+      # Coverage is 65.8% (measured 2026-10-16, 74 tests). The 50% floor is the
+      # original project target and is now comfortably met.
       - name: Run tests with coverage
         working-directory: backend
-        run: php artisan test --coverage --min=25
+        run: php artisan test --coverage --min=50
         env:
           DB_CONNECTION: pgsql
           DB_HOST: 127.0.0.1

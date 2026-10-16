@@ -182,7 +182,9 @@ cd firmware && pio run -e nodemcuv3
 
 ### Deprecation PHP 8.5
 
-Di log CI muncul `Constant PDO::MYSQL_ATTR_SSL_CA not found`. Pesan ini berasal dari bagian MySQL di Laravel yang masih memanggil konstanta MySQL yang sudah dihapus PHP 8.5. Proyek ini tidak pernah terhubung ke MySQL (SQLite untuk dev, PostgreSQL untuk CI/produksi), jadi pesan tersebut **aman dan bisa diabaikan** — bukan error.
+Di log CI muncul `Constant PDO::MYSQL_ATTR_SSL_CA is deprecated`. Pesan ini berasal dari bagian MySQL di Laravel yang masih memanggil konstanta MySQL yang sudah dihapus PHP 8.5 — dan konstanta itu dievaluasi hanya ketika ekstensi `pdo_mysql` terpasang (milik runner CI). Proyek ini tidak pernah terhubung ke MySQL (SQLite untuk dev, PostgreSQL untuk CI/produksi), jadi pesan tersebut **aman dan bisa diabaikan** — bukan error.
+
+Agar log CI tetap terbaca, `phpunit.xml` mengabaikan deprecation yang dipicu kode pihak ketiga (`ignoreIndirectDeprecations`). Deprecation dari `app/` sendiri tetap dilaporkan.
 
 ## License
 
