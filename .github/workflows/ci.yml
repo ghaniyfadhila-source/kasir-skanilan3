@@ -47,6 +47,11 @@ jobs:
         working-directory: backend
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      # .env is gitignored, so key:generate has nothing to write to.
+      - name: Prepare environment
+        working-directory: backend
+        run: cp .env.example .env
+
       - name: Generate key
         working-directory: backend
         run: php artisan key:generate
