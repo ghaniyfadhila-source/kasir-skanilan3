@@ -64,15 +64,22 @@ class KasirPos extends Component
             return;
         }
 
-        $existing = collect($this->cart)->firstWhere('product_id', $productId);
-        if ($existing) {
-            if ($existing['qty'] >= $product['stock']) {
+        // Reading an array element copies it, so the index is needed to write the
+        // new quantity back into the cart - incrementing a copy silently
+        // discarded it and the cashier kept getting a single item.
+        $index = collect($this->cart)->search(
+            fn ($item) => $item['product_id'] == $productId
+        );
+
+        if ($index !== false) {
+            if ($this->cart[$index]['qty'] >= $product['stock']) {
                 $this->dispatch('notify', message: 'Stok tidak mencukupi', type: 'error');
 
                 return;
             }
-            $existing['qty']++;
-            $existing['subtotal'] = $existing['qty'] * $existing['price'];
+
+            $this->cart[$index]['qty']++;
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['qty'] * $this->cart[$index]['price'];
         } else {
             $this->cart[] = [
                 'product_id' => $product['id'],
