@@ -5,7 +5,7 @@
     "keywords": ["laravel", "rfid", "pos", "kasir"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/reverb": "^1.0",
