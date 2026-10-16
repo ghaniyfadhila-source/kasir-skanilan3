@@ -61,15 +61,27 @@ kasirCashlessSkanilan/
 8. `ERROR_NET` → retry 3x → `BOOT`
 
 ### API Endpoints
+
+Semua endpoint dilindungi autentikasi **dan** rate limit (120/menit per console
+untuk `/api/device`, 300/menit untuk `/api/transactions`).
+
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/api/device/register` | Device Token | Register device |
+| POST | `/api/device/register` | - | Register device |
 | GET | `/api/device/{id}/pending-transaction` | Device Token | Check pending |
 | POST | `/api/device/{id}/tap` | Device Token | Process tap |
 | POST | `/api/device/{id}/heartbeat` | Device Token | Status update |
-| POST | `/api/transactions` | Sanctum (kasir) | Create transaction |
-| POST | `/api/transactions/{id}/cancel` | Sanctum (kasir) | Cancel transaction |
+| POST | `/api/transactions` | Device Token atau session kasir | Buat transaksi pending (hanya untuk console pemanggil) |
+| GET | `/api/transactions/{id}/status` | Device Token atau session kasir | Status transaksi (dipakai POS untuk polling) |
+| POST | `/api/transactions/{id}/cancel` | Session kasir pemilik / admin | Batalkan transaksi pending |
 | WS | `/ws/device/{id}` | Device Token | Real-time push |
+
+`/api/transactions` menerima **token device atau session kasir**, karena POS
+memanggilnya dari browser lewat `fetch()`. Transaksi milik console lain dijawab
+**404** (bukan 403) supaya nomor transaksi tidak bisa ditebak satu per satu.
+Untuk menerima session di route `/api`, host POS harus terdaftar di
+`SANCTUM_STATEFUL_DOMAINS` - nilainya sudah memakai `localhost:8000`; kalau
+dipindah ke domain sekolah, sesuaikan variabel ini.
 
 ## Quick Start
 
@@ -144,15 +156,54 @@ Lihat [`docs/adr/0001-supabase-to-vps-migration.md`](docs/adr/0001-supabase-to-v
 ## Development
 
 ```bash
-# Backend test
+# Backend test (89 test, coverage ~66%)
 cd backend && php artisan test
+
+# Test + coverage seperti di CI
+cd backend && php artisan test --coverage --min=50
 
 # Lint
 cd backend && php vendor/bin/pint
 
 # Firmware build check
-cd firmware && pio run -e nodemcuv3
+cd firmware && pio run -e nodemcuv2
 ```
+
+### Test browser (Cypress)
+
+E2E butuh dua server yang sudah jalan lebih dulu (`artisan serve` di terminal 1,
+`artisan reverb:start` di terminal 2):
+
+```bash
+# Semua test, mode interaktif (buka browser Cypress)
+npm run cypress:open
+
+# Headless
+npm run cypress:run
+
+# Per spec
+npm run cypress:run:admin   # panel admin Filament (16 test)
+npm run cypress:run:kasir   # POS kasir (13 test)
+```
+
+Cypress **tidak** dijalankan di GitHub Actions (butuh dua service + browser),
+jadi test browser ini wajib dijalankan manual sebelum demo.
+
+### Backup & reset database
+
+`backend/database/database.sqlite` ikut di-commit, jadi isinya ikut berubah
+setiap ada transaksi. Kalau mau mengembalikan ke data demo:
+
+```bash
+# Cadangkan dulu
+cp backend/database/database.sqlite ~/backup-kasir.sqlite
+
+# Kembalikan ke data demo (admin, kasir, device, 8 produk, 4 kartu, 0 transaksi)
+cd backend && php artisan migrate:fresh --seed
+```
+
+Kalau `git status` menunjukkan `database.sqlite` berubah setelah reset, itu
+wajar - commit ulang bila memang ingin menyimpan kondisi tersebut.
 
 ## Requirements
 
