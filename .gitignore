@@ -40,6 +40,9 @@
 /cypress/videos
 /cypress/downloads
 
+# Working notes (kept on disk, not part of the deliverable)
+/.scratch
+
 # Tooling
 .DS_Store
 Thumbs.db

@@ -119,7 +119,9 @@ jobs:
   firmware-build:
     name: Firmware Build
     runs-on: ubuntu-latest
-    continue-on-error: true
+    # Not continue-on-error: a firmware that does not compile must fail the build.
+    # platformio.ini uses the PlatformIO board id nodemcuv2, which is the NodeMCU
+    # v3 / ESP-12E module.
 
     steps:
       - name: Checkout code
