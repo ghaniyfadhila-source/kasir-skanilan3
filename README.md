@@ -78,9 +78,10 @@ kasirCashlessSkanilan/
 cd backend
 composer install
 cp .env.example .env
-# Edit .env dengan DATABASE_URL Supabase
+# Edit .env: DB_* untuk database lokal, atau DATABASE_URL untuk Postgres terkelola
 php artisan key:generate
 php artisan migrate --seed
+npm install && npm run build   # hanya wajib bila mengubah CSS/JS
 php artisan serve
 # Terminal 2: php artisan reverb:start
 ```
@@ -152,6 +153,36 @@ cd backend && php vendor/bin/pint
 # Firmware build check
 cd firmware && pio run -e nodemcuv3
 ```
+
+## Requirements
+
+| Komponen | Versi | Catatan |
+|---|---|---|
+| PHP | **>= 8.4** | `composer.lock` memakai Symfony 8.1 yang butuh PHP 8.4.1+. PHP 8.5 dipakai di CI. |
+| Composer | 2.x | Wajib untuk `composer install`. |
+| Node.js | 20+ | Untuk Vite/Tailwind ( aset hasil build ikut dikomit, jadi `npm install` hanya perlu saat mengubah CSS/JS). |
+| Database | SQLite (dev) / PostgreSQL (CI & produksi) | MySQL tidak dipakai. |
+| Redis | tidak wajib | Default `.env.example` memakai `file`/`sync`. |
+
+## Catatan Teknis
+
+### Advisory keamanan Laravel 11 (known issue)
+
+`composer audit` melaporkan 4 advisory pada `laravel/framework` **11.57**:
+
+| Advisory | Severity | Kenapa? |
+|---|---|---|
+| CRLF injection pada aturan validasi `email` (PKSA-3r5d-mb8f-1qw9, CVE-2026-48019) | high | Hanya relevan bila alamat email dipakai untuk menyisipkan header mail. Proyek ini **tidak mengirim email**. |
+| Temporary Signed URL path confusion (PKSA-m5cs-t1y6-qpcs) | medium | Proyek ini **tidak memakai** signed URL / temporary route. |
+| XSS pada halaman debug (PKSA-d5tc-s1qs-h781) | low | Hanya versi 12.69+/13.30+ yang terkena; **versi kita tidak kena**. |
+
+**Kenapa tidak di-upgrade:** Laravel 11 sudah tidak mendapat patch keamanan; perbaikannya ada di Laravel 12/13. Naik ke sana berarti Filament v3 (yang dipakai sekarang) tidak lagi cocok dan seluruh Resource/Widget harus ditulis ulang ke Filament v4 — pekerjaan yang jauh melebihi ruang lingkup proyek sekolah ini. Semua jalur terdampak tidak dipakai, jadi risikonya praktis nol.
+
+**Kapan harus jadi prioritas upgrade:** kalau nanti menambah fitur yang mengirim email, memakai signed URL, atau ketika proyek mulai dipakai di server produksi sungguhan.
+
+### Deprecation PHP 8.5
+
+Di log CI muncul `Constant PDO::MYSQL_ATTR_SSL_CA not found`. Pesan ini berasal dari bagian MySQL di Laravel yang masih memanggil konstanta MySQL yang sudah dihapus PHP 8.5. Proyek ini tidak pernah terhubung ke MySQL (SQLite untuk dev, PostgreSQL untuk CI/produksi), jadi pesan tersebut **aman dan bisa diabaikan** — bukan error.
 
 ## License
 
