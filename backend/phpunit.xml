@@ -12,7 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source ignoreIndirectDeprecations="true">
+    <source restrictDeprecations="true" ignoreIndirectDeprecations="true">
         <!--
             Laravel merges its own vendor/laravel/framework/config/database.php
             during boot, and that file touches PDO::MYSQL_ATTR_SSL_CA whenever
