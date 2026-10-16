@@ -67,6 +67,10 @@ jobs:
           DB_USERNAME: kasir
           DB_PASSWORD: kasir
 
+      # phpunit.xml already pins CACHE_DRIVER/SESSION_DRIVER/QUEUE_CONNECTION to
+      # array/sync; PHPUnit does not override variables that already exist in the
+      # environment, so setting them here would take the tests off their
+      # in-memory configuration.
       - name: Run tests with coverage
         working-directory: backend
         run: php artisan test --coverage --min=50
@@ -77,6 +81,7 @@ jobs:
           DB_DATABASE: kasir_test
           DB_USERNAME: kasir
           DB_PASSWORD: kasir
+          BROADCAST_DRIVER: null
 
   backend-lint:
     name: Backend Lint (Pint)
