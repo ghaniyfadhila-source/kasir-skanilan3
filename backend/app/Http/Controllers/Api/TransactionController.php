@@ -28,6 +28,8 @@ class TransactionController extends Controller
 
         $device = Device::where('device_id', $request->device_id)->firstOrFail();
 
+        $this->ensureCallerIsConsole($request, $device);
+
         $items = [];
         $total = 0;
 
@@ -86,8 +88,10 @@ class TransactionController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function status(Transaction $transaction)
+    public function status(Request $request, Transaction $transaction)
     {
+        $this->ensureTransactionBelongsToCaller($request, $transaction);
+
         return response()->json([
             'success' => true,
             'transaction' => [
@@ -97,5 +101,37 @@ class TransactionController extends Controller
                 'items' => $transaction->items,
             ],
         ]);
+    }
+
+    /**
+     * Answer 404 instead of 403 for someone else's transaction: a caller must
+     * not be able to probe which transaction ids exist.
+     */
+    private function ensureTransactionBelongsToCaller(Request $request, Transaction $transaction): void
+    {
+        $user = $request->user();
+
+        if ($user?->isAdmin()) {
+            return;
+        }
+
+        $device = $request->input('authenticated_device');
+
+        if (! $device || $device->id !== $transaction->device_id) {
+            abort(404);
+        }
+    }
+
+    /**
+     * Creating a pending transaction may only be done for the console the
+     * caller is: a token or session for console A cannot open sales on B.
+     */
+    private function ensureCallerIsConsole(Request $request, Device $device): void
+    {
+        $caller = $request->input('authenticated_device');
+
+        if (! $caller || $caller->id !== $device->id) {
+            abort(403, 'Token tidak sesuai device');
+        }
     }
 }
