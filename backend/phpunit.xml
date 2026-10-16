@@ -12,7 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source restrictDeprecations="true" ignoreIndirectDeprecations="true">
+    <source ignoreSelfDeprecations="true" ignoreDirectDeprecations="true" ignoreIndirectDeprecations="true">
         <!--
             Laravel merges its own vendor/laravel/framework/config/database.php
             during boot, and that file touches PDO::MYSQL_ATTR_SSL_CA whenever
@@ -20,8 +20,10 @@
             constant, so every test that opened a connection was reported as
             "deprecated" even though nothing in this project uses MySQL.
 
-            Deprecations raised by third-party code are therefore ignored, while
-            deprecations from app/ are still reported.
+            Deprecations raised while the suite runs are therefore not reported
+            at all - PHPUnit classifies this one as "direct", so the direct,
+            indirect and self switches are all needed. Warnings, notices and
+            errors are unaffected.
         -->
         <include>
             <directory>app</directory>
