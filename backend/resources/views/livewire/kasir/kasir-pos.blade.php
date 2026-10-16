@@ -22,11 +22,11 @@
                     @if(empty($products))
                         <p class="text-gray-500 text-center py-8">Belum ada produk. Tambahkan di panel admin.</p>
                     @else
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="product-grid grid grid-cols-2 sm:grid-cols-3 gap-3">
                             @foreach($products as $product)
                                 <button 
                                     wire:click="addToCart({{ $product['id'] }})"
-                                    class="p-4 border rounded-lg hover:bg-gray-50 transition text-left group"
+                                    class="product-card p-4 border rounded-lg hover:bg-gray-50 transition text-left group"
                                     {{ $product['stock'] <= 0 ? 'disabled' : '' }}
                                 >
                                     <div class="font-medium text-gray-900">{{ $product['name'] }}</div>
@@ -50,7 +50,8 @@
                     <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
                         Keranjang
                         @if(!empty($cart))
-                            <span class="text-sm text-gray-500">{{ count($cart)} item</span>
+                            <span class="text-sm text-gray-500">{{ count($cart) }} item</span>
+                            <button wire:click="clearCart" class="ml-auto text-xs text-red-500 hover:text-red-700">Kosongkan</button>
                         @endif
                     </h2>
 
@@ -59,16 +60,16 @@
                     @else
                         <div class="space-y-3 max-h-64 overflow-y-auto">
                             @foreach($cart as $index => $item)
-                                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <div class="cart-item flex items-center justify-between p-2 bg-gray-50 rounded">
                                     <div class="flex-1 min-w-0">
                                         <div class="font-medium text-sm truncate">{{ $item['name'] }}</div>
                                         <div class="text-xs text-gray-500">Rp {{ number_format($item['price'], 0, ',', '.') }} x {{ $item['qty'] }}</div>
                                     </div>
                                     <div class="flex items-center gap-2 ml-2">
-                                        <button wire:click="updateQty({{ $index }}, {{ $item['qty'] - 1 }})" class="w-6 h-6 rounded border text-xs hover:bg-gray-100">-</button>
-                                        <span class="w-8 text-center text-sm">{{ $item['qty'] }}</span>
-                                        <button wire:click="updateQty({{ $index }}, {{ $item['qty'] + 1 }})" class="w-6 h-6 rounded border text-xs hover:bg-gray-100">+</button>
-                                        <button wire:click="removeFromCart({{ $index }})" class="ml-2 text-red-500 hover:text-red-700 text-xs">✕</button>
+                                        <button wire:click="updateQty({{ $index }}, {{ $item['qty'] - 1 }})" class="cart-qty-dec w-6 h-6 rounded border text-xs hover:bg-gray-100">-</button>
+                                        <span class="qty w-8 text-center text-sm">{{ $item['qty'] }}</span>
+                                        <button wire:click="updateQty({{ $index }}, {{ $item['qty'] + 1 }})" class="cart-qty-inc w-6 h-6 rounded border text-xs hover:bg-gray-100">+</button>
+                                        <button wire:click="removeFromCart({{ $index }})" class="cart-remove ml-2 text-red-500 hover:text-red-700 text-xs">✕</button>
                                     </div>
                                     <div class="text-right ml-2">
                                         <div class="font-semibold text-sm">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</div>
@@ -80,7 +81,7 @@
                         <div class="border-t mt-4 pt-4">
                             <div class="flex justify-between text-lg font-bold">
                                 <span>Total</span>
-                                <span>Rp {{ number_format($total, 0, ',', '.') }}</span>
+                                <span class="cart-total">Rp {{ number_format($total, 0, ',', '.') }}</span>
                             </div>
                             <button 
                                 wire:click="checkout"
@@ -166,7 +167,7 @@
                             <p class="mt-3 text-red-700 font-semibold">{{ $message }}</p>
                             <button 
                                 wire:click="$set('status', 'idle'), $set('message', ''), $set('transactionId', null)"
-                                class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                class="reset-transaction mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
                             >
                                 Transaksi Baru
                             </button>
@@ -177,48 +178,7 @@
         </div>
     </div>
 
-    <!-- Polling Script -->
-    @if($status === 'pending' || $status === 'processing')
-        <script>
-            let pollInterval;
-            
-            document.addEventListener('livewire:load', () => {
-                startPolling();
-            });
-            
-            window.addEventListener('start-polling', (e) => {
-                startPolling();
-            });
-            
-            window.addEventListener('auto-reset', () => {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 3000);
-            });
-            
-            function startPolling() {
-                if (pollInterval) clearInterval(pollInterval);
-                pollInterval = setInterval(async () => {
-                    try {
-                        const response = await fetch(`/api/transactions/${@js($transactionId)}/status`, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-                        const data = await response.json();
-                        if (data.success) {
-                            const status = data.transaction.status;
-                            if (status !== 'pending') {
-                                clearInterval(pollInterval);
-                                @this.call('handlePollResult', data.transaction);
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Poll error:', e);
-                    }
-                }, 2000);
-            }
-        </script>
-    @endif
+    {{-- Status polling lives in resources/js/app.js and is started from PHP with
+         $this->js(), because inline scripts injected by a Livewire morph are
+         not guaranteed to execute. --}}
 </div>

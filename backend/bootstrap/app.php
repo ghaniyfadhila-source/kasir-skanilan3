@@ -1,16 +1,9 @@
 <?php
 
 use App\Http\Middleware\AuthenticateDevice;
-use App\Http\Middleware\EncryptCookies;
-use App\Http\Middleware\VerifyCsrfToken;
-use App\Providers\Filament\AdminPanelProvider;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,15 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->web(append: [
-            EncryptCookies::class,
-            AddQueuedCookiesToResponse::class,
-            StartSession::class,
-            ShareErrorsFromSession::class,
-            VerifyCsrfToken::class,
-            SubstituteBindings::class,
-        ]);
-
+        // NOTE: the "web" middleware group is already defined in app/Http/Kernel.php.
+        // Appending EncryptCookies/StartSession/VerifyCsrfToken here made them run
+        // twice per request, which corrupted the session cookie and produced 419s.
         $middleware->alias([
             'auth.device' => AuthenticateDevice::class,
         ]);
@@ -36,4 +23,4 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->withProviders([AdminPanelProvider::class])->create();
+    ->create();

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -66,9 +67,15 @@ class ProductResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),
-                Forms\Components\Hidden::make('kasir_id')
-                    ->default(auth()->id())
-                    ->dehydrated(fn () => ! auth()->user()?->hasRole('admin')),
+                // products.kasir_id is NOT NULL, so an admin has to pick which
+                // kasir owns the product; a kasir only ever sees their own.
+                Forms\Components\Select::make('kasir_id')
+                    ->label('Kasir')
+                    ->options(fn () => User::role('kasir')->pluck('name', 'id'))
+                    ->required()
+                    ->default(fn () => auth()->user()?->hasRole('kasir') ? auth()->id() : null)
+                    ->disabled(fn () => auth()->user()?->hasRole('kasir'))
+                    ->dehydrated(),
             ]),
         ]);
     }

@@ -7,6 +7,7 @@ use App\Models\Device;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -54,8 +55,6 @@ class DeviceResource extends Resource
                     ->label('API Token')
                     ->disabled()
                     ->dehydrated(false)
-                    ->copyable()
-                    ->copyMessage('Token disalin!')
                     ->helperText('Token untuk autentikasi device. Dihasilkan otomatis saat create.'),
                 Forms\Components\TextInput::make('firmware_version')
                     ->label('Firmware Version')
@@ -133,7 +132,14 @@ class DeviceResource extends Resource
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->action(fn (Device $record) => $record->update(['api_token' => $record->generateApiToken()])),
+                    ->action(function (Device $record) {
+                        $record->update(['api_token' => $record->generateApiToken()]);
+
+                        Notification::make()
+                            ->success()
+                            ->title("Token {$record->device_id} berhasil direset")
+                            ->send();
+                    }),
                 Action::make('view_transactions')
                     ->label('Transaksi')
                     ->icon('heroicon-o-document-text')

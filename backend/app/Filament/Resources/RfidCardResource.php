@@ -6,6 +6,7 @@ use App\Filament\Resources\RfidCardResource\Pages;
 use App\Models\RfidCard;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -114,19 +115,38 @@ class RfidCardResource extends Resource
                     ])
                     ->action(function (RfidCard $record, array $data) {
                         $record->addBalance($data['amount']);
+
+                        Notification::make()
+                            ->success()
+                            ->title('Saldo kartu berhasil ditambahkan')
+                            ->send();
                     }),
                 Action::make('block')
                     ->label('Blokir')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (RfidCard $record) => $record->update(['is_active' => false])),
+                    ->action(function (RfidCard $record) {
+                        $record->update(['is_active' => false]);
+
+                        Notification::make()
+                            ->success()
+                            ->title('Kartu diblokir')
+                            ->send();
+                    }),
                 Action::make('unblock')
                     ->label('Aktifkan')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (RfidCard $record) => ! $record->is_active)
-                    ->action(fn (RfidCard $record) => $record->update(['is_active' => true])),
+                    ->action(function (RfidCard $record) {
+                        $record->update(['is_active' => true]);
+
+                        Notification::make()
+                            ->success()
+                            ->title('Kartu diaktifkan')
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

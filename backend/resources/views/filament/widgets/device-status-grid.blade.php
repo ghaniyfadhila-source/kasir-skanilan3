@@ -1,5 +1,10 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    @foreach ($getDevices() as $device)
+<x-filament-widgets::widget>
+    <x-filament::section
+        :heading="$this->getHeading()"
+        :description="$this->getDescription()"
+    >
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    @foreach ($this->devices as $device)
         <a href="{{ $device['edit_url'] }}" class="block">
             <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition cursor-pointer border-l-4 {{ $device['is_online'] ? 'border-green-500' : 'border-red-500' }}">
                 <div class="flex items-center justify-between mb-3">
@@ -40,14 +45,14 @@
                     @endif
                     <div class="flex justify-between border-t pt-2">
                         <span>Last Seen</span>
-                        <span>{{ $device['last_seen_at'] ? $device['last_seen_at']->format('d/m/Y H:i') : 'Never' }}</span>
+                        <span>{{ $device['last_seen_at'] ?? 'Never' }}</span>
                     </div>
                 </div>
             </div>
         </a>
     @endforeach
 
-    @if(empty($getDevices()))
+    @if(empty($this->devices))
         <div class="col-span-full text-center py-12 text-gray-500">
             <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
@@ -55,4 +60,6 @@
             <p class="mt-2">Belum ada device terdaftar</p>
         </div>
     @endif
-</div>
+        </div>
+    </x-filament::section>
+</x-filament-widgets::widget>

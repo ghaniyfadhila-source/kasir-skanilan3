@@ -1,4 +1,33 @@
-<div wire:ignore class="space-y-2 max-h-96 overflow-y-auto" id="live-transaction-feed">
+<x-filament-widgets::widget>
+    <x-filament::section
+        :heading="$this->getHeading()"
+        :description="$this->getDescription()"
+    >
+        <div
+            wire:ignore
+            x-data="{
+        transactions: [],
+        init() {
+            this.$wire.on('transaction-completed', (data) => {
+                this.transactions.unshift({
+                    id: data.id ?? Date.now(),
+                    time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    device: data.device_name ?? 'Unknown',
+                    buyer: data.card?.user_name ?? 'Unknown',
+                    total: data.total ?? 0,
+                    uid: data.card?.uid ?? 'N/A',
+                    status: data.status ?? 'success',
+                    visible: true,
+                })
+
+                if (this.transactions.length > 50) {
+                    this.transactions.pop()
+                }
+            })
+        },
+    }"
+    class="space-y-2 max-h-96 overflow-y-auto"
+>
     <template x-for="tx in transactions" :key="tx.id">
         <div class="bg-white rounded-lg border p-4 shadow-sm transition-all duration-300" x-show="tx.visible" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100">
             <div class="flex items-center justify-between mb-2">
@@ -21,41 +50,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
         </svg>
         <p class="mt-2">Menunggu transaksi...</p>
+        </div>
     </div>
-</div>
-
-<script>
-document.addEventListener('livewire:load', () => {
-    Livewire.on('transaction-completed', (data) => {
-        const feed = document.getElementById('live-transaction-feed');
-        if (!feed) return;
-
-        const now = new Date();
-        const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        const item = {
-            id: data.id,
-            time,
-            device: data.device_name || 'Unknown',
-            buyer: data.card?.user_name || 'Unknown',
-            total: data.total || 0,
-            uid: data.card?.uid || 'N/A',
-            status: data.status || 'success',
-            visible: true,
-        };
-
-        // Add to Alpine.js data
-        const alpineComponent = feed.__x;
-        if (alpineComponent) {
-            alpineComponent.$data.transactions.unshift(item);
-            if (alpineComponent.$data.transactions.length > 50) {
-                alpineComponent.$data.transactions.pop();
-            }
-        }
-    });
-});
-</script>
-
-@push('scripts')
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-@endpush
+    </x-filament::section>
+</x-filament-widgets::widget>

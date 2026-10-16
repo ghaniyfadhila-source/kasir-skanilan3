@@ -16,6 +16,17 @@ class LiveTransactionFeed extends Widget
 
     protected static ?string $description = 'Real-time transaction feed';
 
+    // Plain Widget has no heading support in Filament v3, so the view asks for it.
+    public function getHeading(): ?string
+    {
+        return static::$heading;
+    }
+
+    public function getDescription(): ?string
+    {
+        return static::$description;
+    }
+
     public function getListeners(): array
     {
         return [

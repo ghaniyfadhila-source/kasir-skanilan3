@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\RfidCardResource\Pages;
 
 use App\Filament\Resources\RfidCardResource;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRfidCards extends ListRecords
@@ -13,7 +13,7 @@ class ListRfidCards extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateRecord::make(),
+            CreateAction::make(),
         ];
     }
 }

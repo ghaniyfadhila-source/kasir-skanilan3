@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Kasir;
 
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use App\Events\TransactionCancelled;
+use App\Events\TransactionCreated;
+use App\Models\Transaction;
+use App\Services\TransactionService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -90,6 +92,12 @@ class KasirPos extends Component
         $this->recalculateTotal();
     }
 
+    public function clearCart()
+    {
+        $this->cart = [];
+        $this->recalculateTotal();
+    }
+
     public function updateQty($index, $qty)
     {
         if (! isset($this->cart[$index])) {
@@ -117,6 +125,15 @@ class KasirPos extends Component
             return;
         }
 
+        $device = auth()->user()?->device;
+
+        if (! $device) {
+            $this->status = 'failed';
+            $this->message = 'Device kasir belum terdaftar';
+
+            return;
+        }
+
         $this->status = 'pending';
         $this->message = 'Menunggu pembeli tap kartu...';
 
@@ -128,24 +145,29 @@ class KasirPos extends Component
             'subtotal' => $i['subtotal'],
         ], $this->cart);
 
-        $response = $this->callApi('/api/transactions', 'POST', [
-            'device_id' => auth()->user()->device->device_id ?? '',
-            'items' => $items,
-        ]);
+        // Call the service in-process: an HTTP request back to our own dev
+        // server would deadlock artisan serve (single threaded).
+        try {
+            $transaction = app(TransactionService::class)->createPendingTransaction($device, $items);
+        } catch (\Throwable $e) {
+            report($e);
 
-        if ($response['success']) {
-            $this->transactionId = $response['transaction']['id'];
-            $this->status = 'processing';
-            $this->startPolling();
-        } else {
             $this->status = 'failed';
-            $this->message = $response['message'] ?? 'Gagal membuat transaksi';
+            $this->message = 'Gagal membuat transaksi';
+
+            return;
         }
+
+        broadcast(new TransactionCreated($transaction))->toOthers();
+
+        $this->transactionId = $transaction->id;
+        $this->status = 'processing';
+        $this->startPolling();
     }
 
-    public function startPolling()
+    public function startPolling(): void
     {
-        $this->dispatch('start-polling', transactionId: $this->transactionId);
+        $this->js("window.kasirPolling.start({$this->transactionId})");
     }
 
     #[On('poll-result')]
@@ -181,11 +203,16 @@ class KasirPos extends Component
             return;
         }
 
-        $response = $this->callApi("/api/transactions/{$this->transactionId}/cancel", 'POST');
-        if ($response['success']) {
-            $this->resetTransaction();
-            $this->dispatch('notify', message: 'Transaksi dibatalkan', type: 'info');
+        $transaction = Transaction::find($this->transactionId);
+
+        if ($transaction?->isPending()) {
+            $transaction->markCancelled();
+
+            broadcast(new TransactionCancelled($transaction))->toOthers();
         }
+
+        $this->resetTransaction();
+        $this->dispatch('notify', message: 'Transaksi dibatalkan', type: 'info');
     }
 
     private function resetTransaction()
@@ -196,30 +223,8 @@ class KasirPos extends Component
         $this->balanceBefore = 0;
         $this->balanceAfter = 0;
         $this->cardInfo = null;
-    }
 
-    private function callApi(string $url, string $method = 'GET', array $data = []): array
-    {
-        $device = auth()->user()->device;
-        $token = $device?->api_token ?? '';
-
-        try {
-            $response = Http::withToken($token)
-                ->timeout(10)
-                ->retry(3, 100)
-                ->{$method}("{$this->baseUrl()}{$url}", $data);
-
-            return $response->json() ?? ['success' => false, 'message' => 'Invalid response'];
-        } catch (ConnectionException $e) {
-            return ['success' => false, 'message' => 'Tidak bisa terhubung ke server'];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => 'Terjadi kesalahan: '.$e->getMessage()];
-        }
-    }
-
-    private function baseUrl(): string
-    {
-        return config('app.url').'/api';
+        $this->js('window.kasirPolling.stop()');
     }
 
     public function render()

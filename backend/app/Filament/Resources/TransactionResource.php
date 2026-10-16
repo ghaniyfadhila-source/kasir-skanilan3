@@ -51,14 +51,11 @@ class TransactionResource extends Resource
                     ->money('IDR')
                     ->disabled()
                     ->dehydrated(false),
-                Forms\Components\BadgeColumn::make('status')
-                    ->colors([
-                        'warning' => 'pending',
-                        'success' => 'success',
-                        'danger' => 'failed',
-                        'gray' => 'cancelled',
-                    ])
-                    ->disabled(),
+                Forms\Components\Placeholder::make('status')
+                    ->label('Status')
+                    ->content(fn (?string $state) => view('filament.resources.transaction-status-badge', [
+                        'status' => $state,
+                    ])),
                 Forms\Components\KeyValue::make('items')
                     ->label('Item')
                     ->disabled()

@@ -31,7 +31,8 @@ class User extends Authenticatable
 
     public function device()
     {
-        return $this->belongsTo(Device::class);
+        // A kasir owns the device; devices.kasir_id is the foreign key.
+        return $this->hasOne(Device::class, 'kasir_id');
     }
 
     public function products()
