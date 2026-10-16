@@ -29,7 +29,8 @@
 
 # Build output
 /backend/public/hot
-/backend/public/build
+# Note: /backend/public/build is committed on purpose. CI does not run
+# `npm run build`, and the login/POS pages must be styled straight after a clone.
 
 # Testing
 /coverage

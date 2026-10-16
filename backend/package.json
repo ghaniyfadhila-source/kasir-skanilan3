@@ -8,9 +8,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.4.0",
-    "laravel-vite-plugin": "^1.0.0",
+    "@tailwindcss/vite": "^4.3.3",
     "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0"
+    "laravel-vite-plugin": "^1.0.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^5.4.0"
   }
 }
