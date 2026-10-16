@@ -12,19 +12,20 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source ignoreSelfDeprecations="true" ignoreDirectDeprecations="true" ignoreIndirectDeprecations="true">
-        <!--
-            Laravel merges its own vendor/laravel/framework/config/database.php
-            during boot, and that file touches PDO::MYSQL_ATTR_SSL_CA whenever
-            pdo_mysql is loaded (the case on CI runners). PHP 8.5 deprecated the
-            constant, so every test that opened a connection was reported as
-            "deprecated" even though nothing in this project uses MySQL.
+    <!--
+        Only app/ counts as source, so coverage is measured on our code alone.
 
-            Deprecations raised while the suite runs are therefore not reported
-            at all - PHPUnit classifies this one as "direct", so the direct,
-            indirect and self switches are all needed. Warnings, notices and
-            errors are unaffected.
-        -->
+        Note on the CI log: every test that opens a database connection is
+        reported as "deprecated". Laravel merges its own
+        vendor/laravel/framework/config/database.php while booting, and that
+        file touches PDO::MYSQL_ATTR_SSL_CA whenever pdo_mysql is loaded (the
+        case on CI runners). PHP 8.5 deprecated the constant. This project never
+        connects to MySQL, and PHPUnit classifies the notice as "direct", so
+        neither the ignoreSelf/Direct/IndirectDeprecations switches nor
+        restrictDeprecations (missing from the bundled XSD) remove it. It is
+        left visible rather than hidden behind a setting that does nothing.
+    -->
+    <source>
         <include>
             <directory>app</directory>
         </include>

@@ -182,9 +182,9 @@ cd firmware && pio run -e nodemcuv3
 
 ### Deprecation PHP 8.5
 
-Di log CI muncul `Constant PDO::MYSQL_ATTR_SSL_CA is deprecated`. Pesan ini berasal dari bagian MySQL di Laravel yang masih memanggil konstanta MySQL yang sudah dihapus PHP 8.5 — dan konstanta itu dievaluasi hanya ketika ekstensi `pdo_mysql` terpasang (milik runner CI). Proyek ini tidak pernah terhubung ke MySQL (SQLite untuk dev, PostgreSQL untuk CI/produksi), jadi pesan tersebut **aman dan bisa diabaikan** — bukan error.
+Di log CI setiap test yang membuka koneksi database ditandai `deprecated`, dengan pesan `Constant PDO::MYSQL_ATTR_SSL_CA is deprecated`. Penyebabnya: Laravel me-merge `vendor/laravel/framework/config/database.php` milik framework saat boot, dan file itu menyentuh `PDO::MYSQL_ATTR_SSL_CA` hanya ketika ekstensi `pdo_mysql` terpasang — yang memang ada di runner CI. PHP 8.5 sudah deprecated konstanta tersebut.
 
-Agar log CI tetap terbaca, `phpunit.xml` mengabaikan deprecation yang dipicu kode pihak ketiga (`ignoreIndirectDeprecations`). Deprecation dari `app/` sendiri tetap dilaporkan.
+Proyek ini tidak pernah terhubung ke MySQL (SQLite untuk dev, PostgreSQL untuk CI/produksi), jadi **pesan ini aman dan boleh diabaikan** — semua test tetap jalan, tidak ada yang gagal. Notifikasi ini tidak bisa dimatikan lewat konfigurasi PHPUnit (sudah dicoba `ignoreSelf/Direct/IndirectDeprecations` dan `restrictDeprecations`), jadi sengaja dibiarkan terlihat daripada disembunyikan dengan pengaturan yang tidak berfungsi. Hilang otomatis setelah proyek naik ke Laravel 12/13.
 
 ## License
 
