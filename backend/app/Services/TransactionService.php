@@ -34,6 +34,8 @@ class TransactionService
         $card = RfidCard::where('uid', $uid)->first();
 
         if (! $card) {
+            $transaction->markFailed('Kartu tidak terdaftar');
+
             return [
                 'success' => false,
                 'message' => 'Kartu tidak terdaftar',
@@ -42,6 +44,8 @@ class TransactionService
         }
 
         if (! $card->is_active) {
+            $transaction->markFailed('Kartu tidak aktif');
+
             return [
                 'success' => false,
                 'message' => 'Kartu tidak aktif',
@@ -50,12 +54,14 @@ class TransactionService
         }
 
         if (! $card->hasSufficientBalance($transaction->total)) {
+            $transaction->markFailed('Saldo tidak mencukupi');
+
             return [
                 'success' => false,
                 'message' => 'Saldo tidak mencukupi',
                 'code' => 'INSUFFICIENT_BALANCE',
-                'balance' => $card->balance,
-                'required' => $transaction->total,
+                'balance' => (float) $card->balance,
+                'required' => (float) $transaction->total,
             ];
         }
 
@@ -82,9 +88,9 @@ class TransactionService
                 'message' => 'Transaksi berhasil',
                 'transaction' => [
                     'id' => $transaction->id,
-                    'total' => $transaction->total,
-                    'balance_before' => $balanceBefore,
-                    'balance_after' => $balanceAfter,
+                    'total' => (float) $transaction->total,
+                    'balance_before' => (float) $balanceBefore,
+                    'balance_after' => (float) $balanceAfter,
                     'card' => [
                         'uid' => $card->uid,
                         'user_name' => $card->user_name,

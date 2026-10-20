@@ -14,6 +14,7 @@ class Transaction extends Model
         'rfid_card_id',
         'total',
         'status',
+        'failure_reason',
         'items',
         'balance_before',
         'balance_after',
@@ -56,7 +57,10 @@ class Transaction extends Model
 
     public function markFailed(string $reason = ''): void
     {
-        $this->update(['status' => 'failed']);
+        $this->update([
+            'status' => 'failed',
+            'failure_reason' => $reason !== '' ? $reason : null,
+        ]);
     }
 
     public function markCancelled(): void

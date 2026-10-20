@@ -15,14 +15,15 @@ void StateMachine::update() {
 }
 
 void StateMachine::transitionTo(DeviceState newState) {
+    DeviceState oldState = currentState;
     previousState = currentState;
     currentState = newState;
     stateStartTime = millis();
-    Serial.printf("[STATE] %s -> %s\n", getStateName(), getStateName());
+    Serial.printf("[STATE] %s -> %s\n", nameOf(oldState), nameOf(newState));
 }
 
-const char* StateMachine::getStateName() const {
-    switch (currentState) {
+const char* StateMachine::nameOf(DeviceState state) {
+    switch (state) {
         case DeviceState::BOOT: return "BOOT";
         case DeviceState::CONNECTING_WIFI: return "CONNECTING_WIFI";
         case DeviceState::REGISTERING: return "REGISTERING";
@@ -35,6 +36,10 @@ const char* StateMachine::getStateName() const {
         case DeviceState::ERROR_HARDWARE: return "ERROR_HARDWARE";
     }
     return "UNKNOWN";
+}
+
+const char* StateMachine::getStateName() const {
+    return nameOf(currentState);
 }
 
 void StateMachine::handleState() {
@@ -56,11 +61,18 @@ void StateMachine::handleTimeout() {
     unsigned long elapsed = millis() - stateStartTime;
 
     switch (currentState) {
-        case DeviceState::WAIT_TAP:
-            if (elapsed >= TRANSACTION_TIMEOUT_MS || (pendingTransaction.hasPending && elapsed >= pendingTransaction.expiresAt)) {
-                onApiResponse(false, "Waktu habis");
+        case DeviceState::WAIT_TAP: {
+            // The server tells us how many seconds the bill is still valid, so
+            // the deadline is relative to millis() instead of an absolute clock
+            // the ESP8266 does not have.
+            unsigned long deadline = pendingTransaction.deadlineMs > 0
+                ? pendingTransaction.deadlineMs
+                : stateStartTime + TRANSACTION_TIMEOUT_MS;
+            if (millis() >= deadline) {
+                onApiResponse(false, "Waktu habis", "TIMEOUT");
             }
             break;
+        }
         case DeviceState::CONNECTING_WIFI:
             if (elapsed > 30000) {
                 onNetworkError();
@@ -87,6 +99,8 @@ void StateMachine::handleTimeout() {
                 transitionTo(DeviceState::BOOT);
             }
             break;
+        default:
+            break;
     }
 }
 
@@ -104,41 +118,28 @@ void StateMachine::handleConnectingWifi() {
 
 void StateMachine::handleRegistering() {
     display.showCustom("Register Device", "Please wait...");
-    
+
     if (net.registerDevice(deviceId, fwVersion)) {
         transitionTo(DeviceState::IDLE);
-    } else {
-        // retry handled by timeout
     }
+    // retry handled by timeout
 }
 
 void StateMachine::handleIdle() {
     display.showIdle();
     hw.setLED(true, false); // Green solid
-    
-    // Check for pending transaction (polling fallback)
-    static unsigned long lastPoll = 0;
-    if (millis() - lastPoll > 5000) {
-        lastPoll = millis();
-        String txId, items;
-        float total;
-        unsigned long expiresAt;
-        if (net.checkPendingTransaction(txId, total, items, expiresAt)) {
-            TransactionData tx;
-            tx.id = txId;
-            tx.total = total;
-            tx.items = items;
-            tx.expiresAt = expiresAt;
-            tx.hasPending = true;
-            onTransactionReceived(tx);
-        }
-    }
+
+    pollPendingTransaction();
 }
 
 void StateMachine::handleWaitTap() {
     display.showWaitTap();
     hw.setLED(false, true); // Red blink (handled in loop)
-    
+
+    // Polling in WAIT_TAP is what detects a cancelled bill: the cashier can
+    // cancel at any time and the WebSocket path is disabled.
+    pollPendingTransaction();
+
     String uid;
     if (hw.readRFID(uid)) {
         onTapDetected(uid);
@@ -158,7 +159,7 @@ void StateMachine::handleSuccess() {
 }
 
 void StateMachine::handleFailed() {
-    display.showFailed("Gagal");
+    display.showFailed(lcdMessage(lastErrorCode));
     hw.beepError();
     hw.setLED(false, true);
 }
@@ -176,25 +177,32 @@ void StateMachine::handleErrorHardware() {
 
 void StateMachine::onTransactionReceived(const TransactionData& tx) {
     pendingTransaction = tx;
+    pendingTransaction.hasPending = true;
+    lastError = "";
+    lastErrorCode = "";
     transitionTo(DeviceState::WAIT_TAP);
 }
 
 void StateMachine::onTapDetected(const String& uid) {
     if (!pendingTransaction.hasPending) return;
-    
+
     transitionTo(DeviceState::PROCESSING);
-    net.sendTap(pendingTransaction.id, uid, 
-        [this](bool success, const String& msg, float balBefore, float balAfter) {
-            this->onApiResponse(success, msg, balBefore, balAfter);
+    net.sendTap(pendingTransaction.id, uid,
+        [this](bool success, const String& code, const String& msg, float balBefore, float balAfter) {
+            this->onApiResponse(success, msg, code, balBefore, balAfter);
         });
 }
 
-void StateMachine::onApiResponse(bool success, const String& message, float balanceBefore, float balanceAfter) {
+void StateMachine::onApiResponse(bool success, const String& message, const String& code,
+                                 float balanceBefore, float balanceAfter) {
     if (success) {
         pendingTransaction.balanceBefore = balanceBefore;
         pendingTransaction.balanceAfter = balanceAfter;
+        pendingTransaction.hasPending = false;
         transitionTo(DeviceState::SUCCESS);
     } else {
+        lastError = message;
+        lastErrorCode = code;
         pendingTransaction.hasPending = false;
         transitionTo(DeviceState::FAILED);
     }
@@ -206,4 +214,53 @@ void StateMachine::onNetworkError() {
 
 void StateMachine::onHardwareError() {
     transitionTo(DeviceState::ERROR_HARDWARE);
+}
+
+/*
+ * Ask the API whether this console still has a pending bill. Called from IDLE
+ * (new bill) and WAIT_TAP (cancelled bill / refreshed time budget).
+ */
+void StateMachine::pollPendingTransaction() {
+    static unsigned long lastPoll = 0;
+    if (millis() - lastPoll < 2000) return;
+    lastPoll = millis();
+
+    String txId, items;
+    float total = 0;
+    unsigned long remainingSeconds = 0;
+
+    if (net.checkPendingTransaction(txId, total, items, remainingSeconds)) {
+        unsigned long remainingMs = (remainingSeconds > 0 ? remainingSeconds : 30) * 1000UL;
+
+        if (currentState == DeviceState::WAIT_TAP && txId == pendingTransaction.id) {
+            pendingTransaction.deadlineMs = millis() + remainingMs;
+            return;
+        }
+
+        TransactionData tx;
+        tx.id = txId;
+        tx.total = total;
+        tx.items = items;
+        tx.deadlineMs = millis() + remainingMs;
+        tx.hasPending = true;
+        onTransactionReceived(tx);
+        return;
+    }
+
+    // A 200 without has_pending means the bill was completed elsewhere or the
+    // cashier cancelled it. Transport errors are ignored so a dropped packet
+    // cannot cancel a bill the buyer is still paying.
+    if (currentState == DeviceState::WAIT_TAP && net.getLastPendingStatus() == 200) {
+        onApiResponse(false, "Transaksi dibatalkan", "CANCELLED");
+    }
+}
+
+// LCD is 16x2: map API codes to short Indonesian labels that fit.
+const char* StateMachine::lcdMessage(const String& code) const {
+    if (code == "INSUFFICIENT_BALANCE") return MSG_LOW_BALANCE;
+    if (code == "CARD_NOT_FOUND") return "Kartu tdk ada";
+    if (code == "CARD_INACTIVE") return "Kartu diblokir";
+    if (code == "EXPIRED" || code == "TIMEOUT") return MSG_TIMEOUT;
+    if (code == "CANCELLED") return "Dibatalkan";
+    return MSG_FAILED;
 }

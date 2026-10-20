@@ -25,7 +25,7 @@ void onWSMessage(const String& event, const JsonDocument& data) {
         tx.id = data["id"].as<String>();
         tx.total = data["total"].as<float>();
         tx.items = data["items"].as<String>();
-        tx.expiresAt = data["expires_at"].as<unsigned long>();
+        tx.deadlineMs = millis() + TRANSACTION_TIMEOUT_MS;
         tx.hasPending = true;
         stateMachine.onTransactionReceived(tx);
     } else if (event == "transaction.cancelled") {

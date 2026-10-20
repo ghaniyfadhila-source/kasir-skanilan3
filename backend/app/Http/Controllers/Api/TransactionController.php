@@ -63,7 +63,7 @@ class TransactionController extends Controller
             'success' => true,
             'transaction' => [
                 'id' => $transaction->id,
-                'total' => $transaction->total,
+                'total' => (float) $transaction->total,
                 'items' => $transaction->items,
                 'expires_at' => $transaction->expires_at->toISOString(),
             ],
@@ -97,8 +97,15 @@ class TransactionController extends Controller
             'transaction' => [
                 'id' => $transaction->id,
                 'status' => $transaction->status,
-                'total' => $transaction->total,
+                'total' => (float) $transaction->total,
                 'items' => $transaction->items,
+                'balance_before' => (float) $transaction->balance_before,
+                'balance_after' => (float) $transaction->balance_after,
+                'message' => $transaction->failure_reason,
+                'card' => $transaction->rfidCard ? [
+                    'uid' => $transaction->rfidCard->uid,
+                    'user_name' => $transaction->rfidCard->user_name,
+                ] : null,
             ],
         ]);
     }

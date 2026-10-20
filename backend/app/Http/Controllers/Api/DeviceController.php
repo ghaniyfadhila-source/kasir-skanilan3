@@ -23,6 +23,10 @@ class DeviceController extends Controller
         $device = Device::firstOrCreate(
             ['device_id' => $request->device_id],
             [
+                // A label is required: Filament's Select crashes on a null
+                // option label, so an API-registered console must never leave
+                // name empty.
+                'name' => $request->device_id,
                 'firmware_version' => $request->firmware_version,
                 'api_token' => Device::generateApiToken(),
                 'status' => 'active',
@@ -70,14 +74,22 @@ class DeviceController extends Controller
             ]);
         }
 
+        // The console has no clock (no NTP), so it cannot turn the absolute
+        // expiry into a millis() deadline. remaining_seconds is the only field
+        // the firmware needs to time a transaction out.
+        $remainingSeconds = $transaction->expires_at
+            ? max(0, (int) now()->diffInSeconds($transaction->expires_at, false))
+            : null;
+
         return response()->json([
             'success' => true,
             'has_pending' => true,
             'transaction' => [
                 'id' => $transaction->id,
-                'total' => $transaction->total,
+                'total' => (float) $transaction->total,
                 'items' => $transaction->items,
                 'expires_at' => $transaction->expires_at?->toISOString(),
+                'remaining_seconds' => $remainingSeconds,
             ],
         ]);
     }

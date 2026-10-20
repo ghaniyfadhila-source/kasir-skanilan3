@@ -11,7 +11,8 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "cypress:run:admin": "cypress run --spec \"cypress/e2e/admin-flow.cy.js\"",
-    "cypress:run:kasir": "cypress run --spec \"cypress/e2e/kasir-flow.cy.js\""
+    "cypress:run:kasir": "cypress run --spec \"cypress/e2e/kasir-flow.cy.js\"",
+    "cypress:run:console": "cypress run --spec \"cypress/e2e/console-flow.cy.js\""
   },
   "repository": {
     "type": "git",

@@ -2,7 +2,7 @@
 
 Sistem kasir berbasis RFID untuk kantin sekolah menggunakan:
 - **Backend**: Laravel 11 + Filament v3 + Laravel Reverb (WebSocket)
-- **Database**: PostgreSQL (Supabase untuk dev, VPS untuk prod)
+- **Database**: SQLite (dev & test), PostgreSQL (produksi, opsional)
 - **Hardware**: ESP8266 NodeMCU v3 + RFID RC522 + LCD I2C Qapass + Buzzer
 - **Auth**: Spatie Laravel-permission (Admin & Kasir roles)
 
@@ -102,15 +102,19 @@ php artisan serve
 ```bash
 cd firmware
 # Install PlatformIO (VS Code extension atau CLI)
-# Edit include/config.h dengan WiFi & server URL
-pio run -e nodemcuv3 -t upload
+cp include/config.example.h include/config.h   # lalu isi WiFi & API_BASE_URL
+pio run -e nodemcuv2 -t upload
 pio device monitor -b 115200
 ```
+
+Panduan lengkap (wiring, BOM, provisioning, checklist hardware) ada di
+[`firmware/README.md`](firmware/README.md).
 
 ### Hardware Wiring (NodeMCU v3)
 
 | Komponen | Pin NodeMCU | GPIO |
 |----------|-------------|------|
+| RC522 3.3V | 3V3 | — |
 | RC522 SDA/SS | D8 | 15 |
 | RC522 SCK | D5 | 14 |
 | RC522 MOSI | D7 | 13 |
@@ -121,7 +125,8 @@ pio device monitor -b 115200
 | Buzzer | D0 | 16 |
 | LED Built-in | D4 | 2 (status) |
 
-*RST ke D3 (GPIO0) butuh pull-up 10k ke 3.3V agar boot normal.
+*RST ke D3 (GPIO0) butuh pull-up 10k ke 3.3V agar boot normal. LCD sebaiknya
+diberi 3.3V (pull-up I2C mengikuti VCC; ESP8266 tidak tahan 5V).
 
 ## GitHub Issues
 
@@ -182,14 +187,20 @@ npm run cypress:open
 npm run cypress:run
 
 # Per spec
-npm run cypress:run:admin   # panel admin Filament (16 test)
-npm run cypress:run:kasir   # POS kasir (13 test)
+npm run cypress:run:admin    # panel admin Filament (16 test)
+npm run cypress:run:kasir    # POS kasir, API dimock (13 test)
+npm run cypress:run:console  # console ESP, API nyata (4 test)
 ```
+
+Spec `console-flow` meng-impersonasi firmware lewat `cy.request` (register →
+poll tagihan → tap → heartbeat) terhadap server dan database sungguhan, lalu
+memastikan POS menampilkan hasilnya. Ini bukti kontrak firmware ↔ backend
+tanpa hardware.
 
 Di GitHub Actions, job **E2E (Cypress)** menjalankan `npx cypress run` pada
 database SQLite yang baru di-seed, dengan `artisan serve` di port 8000. Server
-Reverb tidak dijalankan karena spec mem-*mock* API transaksi dan polling
-status. Screenshot kegagalan diunggah sebagai artifact.
+Reverb tidak dijalankan: console memakai polling, dan spec kasir mem-*mock*
+API transaksi. Screenshot kegagalan diunggah sebagai artifact.
 
 ### Backup & reset database
 

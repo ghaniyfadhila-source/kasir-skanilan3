@@ -37,7 +37,7 @@ class Device extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function generateApiToken(): string
+    public static function generateApiToken(): string
     {
         return 'dev_'.bin2hex(random_bytes(32));
     }

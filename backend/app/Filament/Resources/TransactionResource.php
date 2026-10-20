@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionResource\Pages;
+use App\Models\Device;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -38,7 +39,8 @@ class TransactionResource extends Resource
             Forms\Components\Section::make('Transaksi')->schema([
                 Forms\Components\Select::make('device_id')
                     ->label('Device')
-                    ->relationship('device', 'name')
+                    ->options(fn () => Device::query()->orderBy('device_id')->get()
+                        ->mapWithKeys(fn (Device $device) => [$device->id => $device->name ?: $device->device_id]))
                     ->disabled()
                     ->dehydrated(false),
                 Forms\Components\Select::make('rfid_card_id')
@@ -130,7 +132,8 @@ class TransactionResource extends Resource
                         'cancelled' => 'Cancelled',
                     ]),
                 Tables\Filters\SelectFilter::make('device_id')
-                    ->relationship('device', 'name')
+                    ->options(fn () => Device::query()->orderBy('device_id')->get()
+                        ->mapWithKeys(fn (Device $device) => [$device->id => $device->name ?: $device->device_id]))
                     ->label('Device')
                     ->visible(auth()->user()?->hasRole('admin')),
                 Tables\Filters\Filter::make('created_at')

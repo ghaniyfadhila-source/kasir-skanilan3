@@ -18,9 +18,11 @@ enum class DeviceState {
 
 struct TransactionData {
     String id;
-    float total;
-    String items;  // JSON string
-    unsigned long expiresAt;
+    float total = 0;
+    String items;
+    // Absolute millis() deadline, derived from the server's remaining_seconds:
+    // the console has no RTC/NTP, so it cannot use the ISO expiry timestamp.
+    unsigned long deadlineMs = 0;
     bool hasPending = false;
     float balanceBefore = 0;
     float balanceAfter = 0;
@@ -40,29 +42,32 @@ extern String fwVersion;
 class StateMachine {
 public:
     StateMachine();
-    
+
     void begin();
     void update();
-    
+
     void onTransactionReceived(const TransactionData& tx);
     void onTapDetected(const String& uid);
-    void onApiResponse(bool success, const String& message, float balanceBefore = 0, float balanceAfter = 0);
+    void onApiResponse(bool success, const String& message, const String& code = "",
+                       float balanceBefore = 0, float balanceAfter = 0);
     void onNetworkError();
     void onHardwareError();
-    
+
     DeviceState getState() const { return currentState; }
     const char* getStateName() const;
-    
+
 private:
     DeviceState currentState = DeviceState::BOOT;
     DeviceState previousState = DeviceState::BOOT;
     unsigned long stateStartTime = 0;
     TransactionData pendingTransaction;
-    
+    String lastError = "";
+    String lastErrorCode = "";
+
     void transitionTo(DeviceState newState);
     void handleState();
     void handleTimeout();
-    
+
     // State handlers
     void handleBoot();
     void handleConnectingWifi();
@@ -74,6 +79,10 @@ private:
     void handleFailed();
     void handleErrorNet();
     void handleErrorHardware();
+
+    void pollPendingTransaction();
+    const char* lcdMessage(const String& code) const;
+    static const char* nameOf(DeviceState state);
 };
 
 #endif
