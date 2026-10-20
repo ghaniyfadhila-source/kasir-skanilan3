@@ -199,13 +199,17 @@ jobs:
 
       - name: Wait for server
         run: |
-          for i in $(seq 1 30); do
-            if curl -sf -o /dev/null http://127.0.0.1:8000/login; then exit 0; fi
+          for i in $(seq 1 60); do
+            status=$(curl -s -o /tmp/login.html -w '%{http_code}' http://127.0.0.1:8000/login || true)
+            if [ "$status" = "200" ]; then exit 0; fi
             sleep 1
           done
-          echo "Laravel server did not start in time"
-          cat /tmp/laravel-serve.log || true
+          echo "GET /login returned $status"
+          head -c 3000 /tmp/login.html || true
+          echo
+          tail -n 60 storage/logs/laravel.log || true
           exit 1
+        working-directory: backend
 
       - name: Setup Node
         uses: actions/setup-node@v4
