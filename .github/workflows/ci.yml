@@ -173,6 +173,7 @@ jobs:
           touch database/database.sqlite
           sed -i 's/^DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env
           sed -i "s|^DB_DATABASE=.*|DB_DATABASE=$(pwd)/database/database.sqlite|" .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env
 
       - name: Generate key
         working-directory: backend
