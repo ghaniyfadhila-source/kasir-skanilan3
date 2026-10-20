@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\PasswordResetLinkRequest;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Response;
+use Illuminate\Support\Facades\Password;
+use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
-    public function create(): Response
+    public function create(): View
     {
-        return inertia('Auth/ForgotPassword');
+        return view('auth.forgot-password');
     }
 
     public function store(PasswordResetLinkRequest $request): RedirectResponse

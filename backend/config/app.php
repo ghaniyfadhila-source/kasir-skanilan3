@@ -10,6 +10,10 @@ return [
     'app_name' => 'Kasir Cashless Skanilan',
     'app_url' => env('APP_URL', 'http://localhost:8000'),
 
+    'locale' => env('APP_LOCALE', 'id'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'id_ID'),
+
     'database' => [
         'url' => env('DATABASE_URL'),
     ],

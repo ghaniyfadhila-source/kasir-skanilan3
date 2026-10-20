@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\NewPasswordRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
-        return inertia('Auth/ResetPassword', ['token' => $request->route('token')]);
+        return view('auth.reset-password', ['request' => $request]);
     }
 
     public function store(NewPasswordRequest $request): RedirectResponse

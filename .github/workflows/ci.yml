@@ -139,10 +139,90 @@ jobs:
         working-directory: firmware
         run: pio run -e nodemcuv2
 
+  e2e-cypress:
+    name: E2E (Cypress)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, mbstring, xml, curl, zip
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      # E2E runs against a fresh SQLite database so the suite is deterministic.
+      - name: Prepare environment
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env
+
+      - name: Generate key
+        working-directory: backend
+        run: php artisan key:generate
+
+      - name: Run migrations and seed demo data
+        working-directory: backend
+        run: php artisan migrate:fresh --seed --force
+        env:
+          DB_CONNECTION: sqlite
+          BROADCAST_DRIVER: 'null'
+
+      # Cypress specs mock the transaction API and Livewire polling, so the
+      # HTTP server is enough; Reverb is not started here.
+      - name: Start Laravel server
+        working-directory: backend
+        run: php artisan serve --port=8000 &
+        env:
+          DB_CONNECTION: sqlite
+          BROADCAST_DRIVER: 'null'
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000 > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo "Laravel server did not start in time" && exit 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cypress
+        run: npm ci
+
+      - name: Run Cypress (admin + kasir)
+        run: npx cypress run
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
   deploy-staging:
     name: Deploy Staging
     runs-on: ubuntu-latest
-    needs: [backend-test, backend-lint]
+    needs: [backend-test, backend-lint, e2e-cypress]
     if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     environment: staging
 

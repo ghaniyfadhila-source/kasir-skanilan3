@@ -8,13 +8,13 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    public function create(): Response
+    public function create(): View
     {
-        return inertia('Auth/Register');
+        return view('auth.register');
     }
 
     public function store(RegisteredUserRequest $request): RedirectResponse
@@ -27,6 +27,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect('/');
     }
 }

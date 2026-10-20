@@ -12,6 +12,6 @@ class VerifyEmailController extends Controller
     {
         $request->fulfill();
 
-        return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+        return redirect()->intended('/kasir/pos'.'?verified=1');
     }
 }

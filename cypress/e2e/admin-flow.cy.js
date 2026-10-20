@@ -140,14 +140,14 @@ function openTableFilters() {
 
 function deleteViaBulkActions() {
   cy.get('table tbody tr input[type="checkbox"]').last().check()
-  clickUntil('button[title="Bulk actions"]', (doc) => {
+  clickUntil('button[title="Tindakan"]', (doc) => {
     const panel = doc.querySelector('.fi-dropdown-panel')
     return !!panel && getComputedStyle(panel).display !== 'none'
   })
-  clickUntil('.fi-dropdown-panel .fi-dropdown-list-item:contains("Delete")', isDialogOpen)
+  clickUntil('.fi-dropdown-panel .fi-dropdown-list-item:contains("Hapus yang dipilih")', isDialogOpen)
   cy.get(openDialog, { timeout: 15000 }).should('exist')
   confirmModal()
-      cy.contains('Deleted').should('be.visible')
+  cy.contains('Data berhasil dihapus').should('be.visible')
 }
 
 // Filament renders a loading skeleton for lazy widgets, so reveal them first.
@@ -168,7 +168,7 @@ describe('Admin Flow', () => {
 
   it('logs in as admin and lands on dashboard', () => {
     cy.url().should('include', '/admin')
-    cy.contains('Dashboard').should('be.visible')
+    cy.contains('Dasbor').should('be.visible')
   })
 
   describe('Devices', () => {
@@ -183,7 +183,7 @@ describe('Admin Flow', () => {
       cy.get(formInput('name')).type('Test Device')
       cy.get(formSelect('status')).select('active')
       cy.get(submitForm).click()
-      cy.contains('Created').should('be.visible')
+      cy.contains('Data berhasil dibuat').should('be.visible')
     })
 
     it('resets device token', () => {
@@ -196,7 +196,7 @@ describe('Admin Flow', () => {
       cy.get('table tbody tr').first().find(rowEditLink).click()
       cy.get(formInput('name')).clear().type('Updated Device')
       cy.get(submitForm).click()
-      cy.contains('Saved').should('be.visible')
+      cy.contains('Data berhasil disimpan').should('be.visible')
     })
 
     it('deletes device', () => {
@@ -219,20 +219,20 @@ describe('Admin Flow', () => {
       // products.kasir_id is NOT NULL: the product belongs to a kasir.
       cy.get(formSelect('kasir_id')).select(1)
       cy.get(submitForm).click()
-      cy.contains('Created').should('be.visible')
+      cy.contains('Data berhasil dibuat').should('be.visible')
     })
 
     it('edits product stock', () => {
       cy.get('table tbody tr').first().find(rowEditLink).click()
       cy.get(formInput('stock')).clear().type('20')
       cy.get(submitForm).click()
-      cy.contains('Saved').should('be.visible')
+      cy.contains('Data berhasil disimpan').should('be.visible')
     })
 
     it('deletes product', () => {
       openActionModal('delete')
       confirmModal()
-      cy.contains('Deleted').should('be.visible')
+      cy.contains('Data berhasil dihapus').should('be.visible')
     })
   })
 
@@ -248,7 +248,7 @@ describe('Admin Flow', () => {
       cy.get(formInput('user_name')).type('Test User')
       cy.get(formInput('balance')).type('50000')
       cy.get(submitForm).click()
-      cy.contains('Created').should('be.visible')
+      cy.contains('Data berhasil dibuat').should('be.visible')
     })
 
     it('top-ups RFID card balance', () => {

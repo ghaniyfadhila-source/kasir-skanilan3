@@ -171,8 +171,8 @@ cd firmware && pio run -e nodemcuv2
 
 ### Test browser (Cypress)
 
-E2E butuh dua server yang sudah jalan lebih dulu (`artisan serve` di terminal 1,
-`artisan reverb:start` di terminal 2):
+E2E lokal butuh dua server yang sudah jalan lebih dulu (`artisan serve` di
+terminal 1, `artisan reverb:start` di terminal 2):
 
 ```bash
 # Semua test, mode interaktif (buka browser Cypress)
@@ -186,8 +186,10 @@ npm run cypress:run:admin   # panel admin Filament (16 test)
 npm run cypress:run:kasir   # POS kasir (13 test)
 ```
 
-Cypress **tidak** dijalankan di GitHub Actions (butuh dua service + browser),
-jadi test browser ini wajib dijalankan manual sebelum demo.
+Di GitHub Actions, job **E2E (Cypress)** menjalankan `npx cypress run` pada
+database SQLite yang baru di-seed, dengan `artisan serve` di port 8000. Server
+Reverb tidak dijalankan karena spec mem-*mock* API transaksi dan polling
+status. Screenshot kegagalan diunggah sebagai artifact.
 
 ### Backup & reset database
 

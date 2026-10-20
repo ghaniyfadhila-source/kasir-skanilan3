@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\TransactionCompleted;
 use App\Models\Device;
+use App\Models\Product;
 use App\Models\RfidCard;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
@@ -69,6 +70,10 @@ class TransactionService
                 'balance_before' => $balanceBefore,
                 'balance_after' => $balanceAfter,
             ]);
+
+            foreach ($transaction->items as $item) {
+                Product::where('id', $item['product_id'])->decrement('stock', $item['qty']);
+            }
 
             broadcast(new TransactionCompleted($transaction))->toOthers();
 

@@ -33,7 +33,7 @@ it('throttles login after too many attempts', function () {
     ]);
 
     $response->assertSessionHasErrors('email');
-    expect(session('errors')->first('email'))->toContain('Too many login attempts');
+    expect(session('errors')->first('email'))->toContain('Terlalu banyak percobaan masuk');
     $this->assertGuest();
 });
 
