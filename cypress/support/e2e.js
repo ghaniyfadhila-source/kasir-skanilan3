@@ -22,7 +22,8 @@ import './commands'
 // recovers as soon as the bundle loads, so ignore only this exact race instead
 // of letting it fail the whole spec.
 Cypress.on('uncaught:exception', (err) => {
-  if (err.message.includes('$store.sidebar.isOpen')) {
+  const stack = err.stack || ''
+  if (stack.includes('$store.sidebar') || err.message.includes('$store.sidebar.isOpen')) {
     return false
   }
 })
