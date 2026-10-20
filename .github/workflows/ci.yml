@@ -188,10 +188,17 @@ jobs:
 
       # Cypress specs mock the transaction API and Livewire polling, so the
       # HTTP server is enough; Reverb is not started here.
+      - name: Cache config, routes and views
+        working-directory: backend
+        run: php artisan optimize
+        env:
+          DB_CONNECTION: sqlite
+          BROADCAST_DRIVER: 'null'
+
       - name: Start Laravel server
         working-directory: backend
         run: |
-          nohup php artisan serve --host=127.0.0.1 --port=8000 > /tmp/laravel-serve.log 2>&1 &
+          PHP_CLI_SERVER_WORKERS=4 nohup php artisan serve --host=127.0.0.1 --port=8000 > /tmp/laravel-serve.log 2>&1 &
           echo $! > /tmp/laravel-serve.pid
           disown
         env:
