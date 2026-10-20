@@ -189,7 +189,10 @@ jobs:
       # HTTP server is enough; Reverb is not started here.
       - name: Start Laravel server
         working-directory: backend
-        run: php artisan serve --port=8000 &
+        run: |
+          nohup php artisan serve --host=127.0.0.1 --port=8000 > /tmp/laravel-serve.log 2>&1 &
+          echo $! > /tmp/laravel-serve.pid
+          disown
         env:
           DB_CONNECTION: sqlite
           BROADCAST_DRIVER: 'null'
@@ -197,10 +200,12 @@ jobs:
       - name: Wait for server
         run: |
           for i in $(seq 1 30); do
-            if curl -sf http://127.0.0.1:8000 > /dev/null; then exit 0; fi
+            if curl -sf -o /dev/null http://127.0.0.1:8000/login; then exit 0; fi
             sleep 1
           done
-          echo "Laravel server did not start in time" && exit 1
+          echo "Laravel server did not start in time"
+          cat /tmp/laravel-serve.log || true
+          exit 1
 
       - name: Setup Node
         uses: actions/setup-node@v4
