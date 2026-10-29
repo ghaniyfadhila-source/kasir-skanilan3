@@ -9,6 +9,7 @@
 | **Device** | Hardware console (ESP8266 + RFID + LCD + Buzzer) yang dipasang di meja kasir. Identifikasi unik via `device_id` (MAC address). | ≠ "Console", ≠ "Terminal", ≠ "Reader" |
 | **Kasir** | User (penjual) yang login ke panel, mengelola produk miliknya, memantau console dan riwayat transaksinya, lalu memulai transaksi di POS. Punya 1 akun + 1 device. | ≠ "Penjual" (role), ≠ "Admin" |
 | **Panel Kasir** | Halaman Filament `/admin` yang dipakai bersama admin dan kasir. Kasir hanya melihat produk, transaksi, chart, dan status console miliknya; admin melihat semuanya. | ≠ "POS" (halaman checkout), ≠ "Admin Panel" (khusus admin) |
+| **POS** | Halaman checkout di dalam panel, `/admin/pos`, hanya untuk role kasir. URL lama `/kasir/pos` dialihkan 301 ke sini. | ≠ "Panel Kasir", ≠ "Dashboard" |
 | **Admin** | User dengan akses penuh: CRUD device, assign device ke kasir, monitoring semua transaksi, CRUD kartu RFID. | ≠ "Superadmin" |
 | **Pembeli** | Orang yang membeli, dibawa kartu RFID. Bisa siswa/guru/staff. Tidak punya login web. | ≠ "Customer", ≠ "User" |
 | **RFID Card** | Kartu fisik berisi UID unik. Saldo & status aktif disimpan di database (bukan di kartu). | ≠ "Kartu", ≠ "Tag", ≠ "E-Wallet" |

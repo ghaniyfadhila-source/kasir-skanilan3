@@ -18,6 +18,11 @@ linked to a cashier only by an admin.
   transactions, a revenue chart scoped to their console, the status of that
   console, and the built-in logout action. User management, devices, and RFID
   cards are admin-only.
+- **The POS is a page inside the panel.** Kasir work at `/admin/pos`, which
+  embeds the existing `KasirPos` Livewire component in embedded mode. The old
+  `/kasir/pos` URL stays as a 301 redirect to the panel page, and the
+  `kasir.pos` route name is kept for old bookmarks. Only users with the kasir
+  role can open the page; admins stay on the dashboard.
 - **`devices.kasir_id` is the single source of truth.** It is nullable and
   unique, so an unassigned console can register itself and wait for an admin,
   while a kasir can own at most one console. The legacy `users.device_id`
@@ -46,4 +51,4 @@ linked to a cashier only by an admin.
 - The device form rejects a second device for a kasir who already has one.
 - Provisioning a new kasir is: admin creates the account, the console registers
   itself, admin assigns the console, then the kasir adds products and opens
-  `/kasir/pos`.
+  `/admin/pos`.

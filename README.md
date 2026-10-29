@@ -44,7 +44,8 @@ kasirCashlessSkanilan/
 - **Transaction Monitoring**: Real-time feed, filter per device, export
 - **Dashboard Widgets**: Device status grid, live transaction feed, chart omzet
 
-### Kasir POS (Livewire)
+### Kasir POS (Livewire di `/admin/pos`)
+- Halaman Filament `/admin/pos`; `/kasir/pos` dialihkan (301) ke halaman panel
 - Pilih produk → total otomatis → klik "Bayar" → tunggu tap RFID
 - Real-time polling/WebSocket untuk status transaksi
 - Timeout 30 detik auto-cancel

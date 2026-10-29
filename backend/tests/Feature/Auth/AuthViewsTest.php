@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Filament\Pages\KasirPos;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AuthViewsTest extends TestCase
@@ -63,5 +65,28 @@ class AuthViewsTest extends TestCase
 
         $response = $this->actingAs($user)->get('/confirm-password');
         $response->assertStatus(200);
+    }
+
+    public function test_verify_email_link_redirects_to_panel_pos(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $user = User::create([
+            'name' => 'Kasir Verifikasi',
+            'email' => 'verifikasi@skanilan.local',
+            'password' => 'password123',
+        ]);
+        $user->assignRole('kasir');
+
+        $url = URL::temporarySignedRoute('verification.verify', now()->addMinutes(60), [
+            'id' => $user->id,
+            'hash' => sha1($user->email),
+        ]);
+
+        $this->actingAs($user)
+            ->get($url)
+            ->assertRedirect(KasirPos::getUrl().'?verified=1');
+
+        expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
     }
 }
