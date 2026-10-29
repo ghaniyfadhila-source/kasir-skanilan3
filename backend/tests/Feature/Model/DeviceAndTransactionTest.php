@@ -1,5 +1,8 @@
 <?php
 
+use App\Events\TransactionCancelled;
+use App\Events\TransactionCompleted;
+use App\Events\TransactionCreated;
 use App\Models\Device;
 use App\Models\RfidCard;
 use App\Models\Transaction;
@@ -150,4 +153,22 @@ it('links a transaction to the card that paid for it', function () {
     expect($transaction->rfidCard->uid)->toEqual($this->card->uid)
         ->and((float) $transaction->balance_after)->toEqual(35000.0)
         ->and($transaction->items)->toBeArray();
+});
+
+it('broadcasts on the channel named after the console device id', function () {
+    $transaction = Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => 15000,
+        'status' => 'pending',
+        'items' => [],
+        'balance_before' => 0,
+        'balance_after' => 0,
+    ]);
+
+    foreach ([TransactionCreated::class, TransactionCompleted::class, TransactionCancelled::class] as $event) {
+        $channels = collect((new $event($transaction))->broadcastOn())->pluck('name');
+
+        expect($channels)->toContain('private-device.'.$this->device->device_id)
+            ->not->toContain('private-device.'.$this->device->id);
+    }
 });

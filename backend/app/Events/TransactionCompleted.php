@@ -20,7 +20,7 @@ class TransactionCompleted implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('device.'.$this->transaction->device_id),
+            new PrivateChannel('device.'.$this->transaction->device->device_id),
             new PrivateChannel('admin.transactions'),
         ];
     }
