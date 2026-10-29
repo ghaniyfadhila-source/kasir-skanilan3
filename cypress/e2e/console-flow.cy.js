@@ -109,7 +109,7 @@ function startOrder() {
 describe('Console Flow (firmware contract + POS)', () => {
   beforeEach(() => {
     cy.loginKasir('kasir@skanilan.local', 'password123')
-    cy.visit('/kasir/pos')
+    cy.visit('/admin/pos')
     cy.get('.product-grid').should('exist')
     registerConsole()
   })

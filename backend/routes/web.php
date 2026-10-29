@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Kasir\KasirPos;
+use App\Filament\Pages\KasirPos;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,14 +20,14 @@ Route::get('/', function () {
             return redirect()->route('filament.admin.pages.dashboard');
         }
 
-        return redirect()->route('kasir.pos');
+        return redirect()->to(KasirPos::getUrl());
     }
 
     return redirect()->route('login');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/kasir/pos', KasirPos::class)->name('kasir.pos');
-});
+// The POS now lives inside the Filament panel. Keep the old URL and route name
+// so bookmarks and older links keep working; both point at the panel page.
+Route::get('/kasir/pos', fn () => redirect()->to(KasirPos::getUrl(), 301))->name('kasir.pos');
 
 require __DIR__.'/auth.php';

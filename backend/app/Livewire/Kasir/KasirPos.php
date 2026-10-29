@@ -6,11 +6,9 @@ use App\Events\TransactionCancelled;
 use App\Events\TransactionCreated;
 use App\Models\Transaction;
 use App\Services\TransactionService;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[Layout('components.layouts.app')]
 class KasirPos extends Component
 {
     public bool $embedded = false;

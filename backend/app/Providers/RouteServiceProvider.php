@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    public const HOME = '/kasir/pos';
+    public const HOME = '/admin/pos';
 
     public function boot(): void
     {

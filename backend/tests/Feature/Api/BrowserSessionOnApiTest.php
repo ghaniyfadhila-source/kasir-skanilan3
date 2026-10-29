@@ -49,7 +49,7 @@ it('lets the POS browser poll the status with its login session', function () {
         'password' => 'password123',
     ]);
 
-    $this->withHeader('referer', config('app.url').'/kasir/pos')
+    $this->withHeader('referer', config('app.url').'/admin/pos')
         ->getJson("/api/transactions/{$this->transaction->id}/status")
         ->assertOk()
         ->assertJson([
@@ -59,7 +59,7 @@ it('lets the POS browser poll the status with its login session', function () {
 });
 
 it('still rejects the same call without a login', function () {
-    $this->withHeader('referer', config('app.url').'/kasir/pos')
+    $this->withHeader('referer', config('app.url').'/admin/pos')
         ->getJson("/api/transactions/{$this->transaction->id}/status")
         ->assertUnauthorized();
 });

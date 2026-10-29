@@ -66,12 +66,12 @@ function mockCreate(transactionId = 42) {
 describe('Kasir POS Flow', () => {
   beforeEach(() => {
     cy.loginKasir('kasir@skanilan.local', 'password123')
-    cy.visit('/kasir/pos')
+    cy.visit('/admin/pos')
     cy.get('.product-grid').should('exist')
   })
 
   it('logs in as kasir and lands on POS page', () => {
-    cy.url().should('include', '/kasir/pos')
+    cy.url().should('include', '/admin/pos')
     cy.contains('Kasir Cashless').should('be.visible')
     cy.get('.product-grid').should('exist')
   })

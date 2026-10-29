@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Filament\Pages\KasirPos;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,6 @@ class VerifyEmailController extends Controller
     {
         $request->fulfill();
 
-        return redirect()->intended('/kasir/pos'.'?verified=1');
+        return redirect()->intended(KasirPos::getUrl().'?verified=1');
     }
 }

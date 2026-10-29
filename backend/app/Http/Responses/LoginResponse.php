@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses;
 
+use App\Filament\Pages\KasirPos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,6 @@ class LoginResponse
             return redirect()->intended(route('filament.admin.pages.dashboard'));
         }
 
-        return redirect()->intended(route('kasir.pos'));
+        return redirect()->intended(KasirPos::getUrl());
     }
 }

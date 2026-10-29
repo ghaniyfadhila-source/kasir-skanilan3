@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\KasirPos as KasirPosPage;
 use App\Livewire\Kasir\KasirPos;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -19,11 +20,11 @@ beforeEach(function () {
     $this->airMineral = Product::where('name', 'Air Mineral')->firstOrFail();
 });
 
-it('shows the console status and a logout control', function () {
-    $this->actingAs($this->kasir)->get('/kasir/pos')
+it('shows the console status on the panel POS page', function () {
+    $this->actingAs($this->kasir)->get(KasirPosPage::getUrl())
         ->assertOk()
         ->assertSee('Console Kasir 1')
-        ->assertSee('Keluar');
+        ->assertSee('data-kasir-pos', false);
 });
 
 it('tells the cashier to wait for the console while it is offline', function () {

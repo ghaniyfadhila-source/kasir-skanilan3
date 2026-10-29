@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\KasirPos;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -53,6 +54,6 @@ it('logs in kasir and redirects to pos page', function () {
         'password' => 'password123',
     ]);
 
-    $response->assertRedirect(route('kasir.pos'));
+    $response->assertRedirect(KasirPos::getUrl());
     $this->assertAuthenticated();
 });

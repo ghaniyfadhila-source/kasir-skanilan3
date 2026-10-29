@@ -44,6 +44,24 @@ it('redirects a guest from the POS page to the panel login', function () {
         ->assertRedirect('/admin/login');
 });
 
+it('redirects the legacy POS URL to the panel page', function () {
+    $this->actingAs($this->kasir)
+        ->get('/kasir/pos')
+        ->assertRedirect(KasirPos::getUrl());
+});
+
+it('sends a signed in kasir from the root URL to the panel POS', function () {
+    $this->actingAs($this->kasir)
+        ->get('/')
+        ->assertRedirect(KasirPos::getUrl());
+});
+
+it('sends a signed in admin from the root URL to the dashboard', function () {
+    $this->actingAs($this->admin)
+        ->get('/')
+        ->assertRedirect(route('filament.admin.pages.dashboard'));
+});
+
 it('marks the POS component as embedded when rendered by the page', function () {
     Livewire::actingAs($this->kasir)
         ->test(KasirPosComponent::class, ['embedded' => true])

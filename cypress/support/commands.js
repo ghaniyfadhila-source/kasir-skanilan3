@@ -14,6 +14,6 @@ Cypress.Commands.add('loginKasir', (email, password) => {
     cy.get('input[name="email"]').type(email)
     cy.get('input[name="password"]').type(password)
     cy.get('button[type="submit"]').click()
-    cy.url().should('include', '/kasir/pos')
+    cy.url().should('include', '/admin/pos')
   })
 })
