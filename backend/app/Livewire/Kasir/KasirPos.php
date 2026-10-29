@@ -13,6 +13,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 class KasirPos extends Component
 {
+    public bool $embedded = false;
+
     public $products = [];
 
     public $cart = [];
@@ -35,8 +37,10 @@ class KasirPos extends Component
 
     public $cardInfo = null;
 
-    public function mount()
+    public function mount(bool $embedded = false)
     {
+        $this->embedded = $embedded;
+
         $this->loadProducts();
     }
 
