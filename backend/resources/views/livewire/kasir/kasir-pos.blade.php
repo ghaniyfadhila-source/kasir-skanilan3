@@ -5,9 +5,15 @@
             <h1 class="text-xl font-bold text-gray-900">Kasir Cashless</h1>
             <div class="flex items-center gap-4">
                 <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
-                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                    {{ auth()->user()->device?->name ?? 'No Device' }}
+                @php($device = auth()->user()->device)
+                <span class="inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs {{ $device?->isOnline() ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">
+                    <span class="h-2 w-2 rounded-full {{ $device?->isOnline() ? 'bg-green-500' : 'bg-gray-400' }}"></span>
+                    {{ $device?->name ?? 'No Device' }}
                 </span>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="logout-button text-sm text-gray-500 hover:text-red-600">Keluar</button>
+                </form>
             </div>
         </div>
     </header>
@@ -125,6 +131,9 @@
                         <div class="text-center py-8">
                             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
                             <p class="mt-3 text-gray-600">Memproses pembayaran...</p>
+                            <p class="text-sm text-gray-400 mt-1">
+                                {{ auth()->user()->device?->isOnline() ? 'Menunggu pembeli tap kartu...' : 'Menunggu console online...' }}
+                            </p>
                         </div>
                     
                     @elseif($status === 'success')

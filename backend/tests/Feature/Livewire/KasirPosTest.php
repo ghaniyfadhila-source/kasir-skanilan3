@@ -19,6 +19,23 @@ beforeEach(function () {
     $this->airMineral = Product::where('name', 'Air Mineral')->firstOrFail();
 });
 
+it('shows the console status and a logout control', function () {
+    $this->actingAs($this->kasir)->get('/kasir/pos')
+        ->assertOk()
+        ->assertSee('Console Kasir 1')
+        ->assertSee('Keluar');
+});
+
+it('tells the cashier to wait for the console while it is offline', function () {
+    $this->device->update(['last_seen_at' => null]);
+
+    Livewire::actingAs(User::where('email', 'kasir@skanilan.local')->firstOrFail())
+        ->test(KasirPos::class)
+        ->call('addToCart', $this->nasiGoreng->id)
+        ->call('checkout')
+        ->assertSee('Menunggu console online...');
+});
+
 it('loads only active products that still have stock', function () {
     Product::create([
         'kasir_id' => $this->kasir->id,
