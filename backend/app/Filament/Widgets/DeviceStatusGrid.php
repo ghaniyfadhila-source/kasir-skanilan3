@@ -35,8 +35,13 @@ class DeviceStatusGrid extends Widget
      */
     public function getDevicesProperty(): array
     {
-        return Device::with('kasir')
-            ->orderBy('name')
+        $query = Device::with('kasir')->orderBy('name');
+
+        if (! auth()->user()?->hasRole('admin')) {
+            $query->where('kasir_id', auth()->id());
+        }
+
+        return $query
             ->get()
             ->map(fn ($device) => [
                 'id' => $device->id,
@@ -46,7 +51,9 @@ class DeviceStatusGrid extends Widget
                 'is_online' => $device->isOnline(),
                 'last_seen_at' => $device->last_seen_at?->format('d/m/Y H:i'),
                 'kasir_name' => $device->kasir?->name,
-                'edit_url' => DeviceResource::getUrl('edit', ['record' => $device]),
+                'edit_url' => auth()->user()?->hasRole('admin')
+                    ? DeviceResource::getUrl('edit', ['record' => $device])
+                    : null,
             ])
             ->toArray();
     }

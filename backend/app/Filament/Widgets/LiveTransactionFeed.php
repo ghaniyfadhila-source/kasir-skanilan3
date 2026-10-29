@@ -29,6 +29,14 @@ class LiveTransactionFeed extends Widget
 
     public function getListeners(): array
     {
+        $user = auth()->user();
+
+        if (! $user?->hasRole('admin') && $user?->device) {
+            return [
+                "echo:private-device.{$user->device->device_id},.transaction.completed" => 'onTransactionCompleted',
+            ];
+        }
+
         return [
             'echo:private-admin.transactions,.transaction.completed' => 'onTransactionCompleted',
         ];

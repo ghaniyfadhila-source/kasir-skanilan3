@@ -3,6 +3,8 @@
 use App\Filament\Widgets\DeviceStatusGrid;
 use App\Filament\Widgets\LiveTransactionFeed;
 use App\Filament\Widgets\RevenueChart;
+use App\Filament\Widgets\SalesOverview;
+use App\Models\Device;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
@@ -41,6 +43,23 @@ it('reports a stale console as offline', function () {
     $rows = collect(Livewire::test(DeviceStatusGrid::class)->get('devices'));
 
     expect($rows->first()['is_online'])->toBeFalse();
+});
+
+it('shows only the console of the logged in kasir', function () {
+    Device::create([
+        'device_id' => 'ESP8266_UNASSIGNED',
+        'name' => 'Console Belum Ditautkan',
+        'status' => 'active',
+    ]);
+
+    $kasir = User::where('email', 'kasir@skanilan.local')->firstOrFail();
+    $this->actingAs($kasir);
+
+    $rows = collect(Livewire::test(DeviceStatusGrid::class)->get('devices'));
+
+    expect($rows)->toHaveCount(1)
+        ->and($rows->first()['device_id'])->toEqual('ESP8266_DEMO_001')
+        ->and($rows->first()['edit_url'])->toBeNull();
 });
 
 it('exposes the heading and description of the plain widgets', function () {
@@ -91,6 +110,84 @@ it('returns an empty dataset when nothing has been sold yet', function () {
         ->and($data['datasets'][0]['data'])->toBeEmpty();
 });
 
+it('keeps another kasir revenue out of the chart', function () {
+    $otherKasir = User::create([
+        'name' => 'Kasir Lain',
+        'email' => 'kasir.lain@skanilan.local',
+        'password' => 'password123',
+    ]);
+    $otherKasir->assignRole('kasir');
+
+    $otherDevice = Device::create([
+        'device_id' => 'ESP8266_OTHER',
+        'name' => 'Console Kasir Lain',
+        'status' => 'active',
+        'kasir_id' => $otherKasir->id,
+    ]);
+
+    Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => 15000,
+        'status' => 'success',
+        'items' => [],
+        'created_at' => now(),
+    ]);
+    Transaction::create([
+        'device_id' => $otherDevice->id,
+        'total' => 99000,
+        'status' => 'success',
+        'items' => [],
+        'created_at' => now(),
+    ]);
+
+    $kasir = User::where('email', 'kasir@skanilan.local')->firstOrFail();
+    $this->actingAs($kasir);
+
+    $chart = Livewire::test(RevenueChart::class);
+    $data = Closure::bind(fn () => $this->getData(), $chart->instance(), RevenueChart::class)();
+
+    expect($data['datasets'][0]['data'])->toEqual([15000.0]);
+});
+
+it('summarises today sales for the logged in kasir only', function () {
+    $otherKasir = User::create([
+        'name' => 'Kasir Lain',
+        'email' => 'kasir.lain@skanilan.local',
+        'password' => 'password123',
+    ]);
+    $otherKasir->assignRole('kasir');
+
+    $otherDevice = Device::create([
+        'device_id' => 'ESP8266_OTHER',
+        'name' => 'Console Kasir Lain',
+        'status' => 'active',
+        'kasir_id' => $otherKasir->id,
+    ]);
+
+    Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => 15000,
+        'status' => 'success',
+        'items' => [],
+        'created_at' => now(),
+    ]);
+    Transaction::create([
+        'device_id' => $otherDevice->id,
+        'total' => 99000,
+        'status' => 'success',
+        'items' => [],
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs(User::where('email', 'kasir@skanilan.local')->firstOrFail());
+
+    $overview = Livewire::test(SalesOverview::class);
+    $stats = Closure::bind(fn () => $this->getStats(), $overview->instance(), SalesOverview::class)();
+
+    expect($stats[0]->getValue())->toEqual('Rp 15.000')
+        ->and($stats[1]->getValue())->toEqual(1);
+});
+
 it('forwards a broadcast transaction to the browser', function () {
     $payload = ['id' => 1, 'total' => 15000];
 
@@ -105,4 +202,14 @@ it('subscribes to the admin transaction channel', function () {
     expect($listeners)->toHaveKey('echo:private-admin.transactions,.transaction.completed')
         ->and($listeners['echo:private-admin.transactions,.transaction.completed'])
         ->toEqual('onTransactionCompleted');
+});
+
+it('subscribes a kasir to their own device channel', function () {
+    $kasir = User::where('email', 'kasir@skanilan.local')->firstOrFail();
+    $this->actingAs($kasir);
+
+    $listeners = Livewire::test(LiveTransactionFeed::class)->instance()->getListeners();
+
+    expect($listeners)->toHaveKey('echo:private-device.'.$this->device->device_id.',.transaction.completed')
+        ->and($listeners)->not->toHaveKey('echo:private-admin.transactions,.transaction.completed');
 });

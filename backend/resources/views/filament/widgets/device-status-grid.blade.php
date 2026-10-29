@@ -5,7 +5,8 @@
     >
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     @foreach ($this->devices as $device)
-        <a href="{{ $device['edit_url'] }}" class="block">
+        @php($tag = $device['edit_url'] ? 'a' : 'div')
+        <{{ $tag }} @if ($device['edit_url']) href="{{ $device['edit_url'] }}" @endif class="block">
             <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition cursor-pointer border-l-4 {{ $device['is_online'] ? 'border-green-500' : 'border-red-500' }}">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-semibold text-gray-900 truncate">{{ $device['name'] }}</h3>
@@ -49,7 +50,7 @@
                     </div>
                 </div>
             </div>
-        </a>
+        </{{ $tag }}>
     @endforeach
 
     @if(empty($this->devices))

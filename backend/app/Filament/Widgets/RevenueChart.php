@@ -19,6 +19,10 @@ class RevenueChart extends ChartWidget
         $data = Transaction::query()
             ->where('status', 'success')
             ->where('created_at', '>=', now()->subDays(30))
+            ->when(
+                ! auth()->user()?->hasRole('admin'),
+                fn ($query) => $query->whereHas('device', fn ($device) => $device->where('kasir_id', auth()->id()))
+            )
             ->selectRaw('DATE(created_at) as date, SUM(total) as total')
             ->groupBy('date')
             ->orderBy('date')
