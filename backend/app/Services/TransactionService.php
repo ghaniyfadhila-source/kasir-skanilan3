@@ -113,7 +113,10 @@ class TransactionService
             'items' => $items,
             'balance_before' => 0,
             'balance_after' => 0,
-            'expires_at' => now()->addSeconds(30),
+            // The 30 second tap window starts when the console actually
+            // collects the bill (DeviceController::pendingTransaction), so a
+            // console that is offline does not burn it before showing anything.
+            'expires_at' => null,
         ]);
     }
 }

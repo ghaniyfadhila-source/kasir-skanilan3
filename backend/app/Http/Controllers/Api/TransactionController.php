@@ -54,7 +54,7 @@ class TransactionController extends Controller
             'items' => $items,
             'balance_before' => 0,
             'balance_after' => 0,
-            'expires_at' => now()->addSeconds(30),
+            'expires_at' => null,
         ]);
 
         broadcast(new TransactionCreated($transaction))->toOthers();
@@ -65,7 +65,7 @@ class TransactionController extends Controller
                 'id' => $transaction->id,
                 'total' => (float) $transaction->total,
                 'items' => $transaction->items,
-                'expires_at' => $transaction->expires_at->toISOString(),
+                'expires_at' => $transaction->expires_at?->toISOString(),
             ],
         ]);
     }

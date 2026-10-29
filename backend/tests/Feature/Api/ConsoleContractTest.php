@@ -100,6 +100,54 @@ it('exposes the pending transaction fields the firmware parses', function () {
     expect($response->json('transaction.expires_at'))->toBeString();
 });
 
+it('starts the tap window when the console first collects the bill', function () {
+    $product = Product::where('name', 'Tahu Goreng')->first();
+    $transaction = Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => $product->price,
+        'status' => 'pending',
+        'items' => [[
+            'product_id' => $product->id,
+            'name' => $product->name,
+            'qty' => 1,
+            'price' => $product->price,
+            'subtotal' => $product->price,
+        ]],
+        'expires_at' => null,
+    ]);
+
+    expect($transaction->expires_at)->toBeNull();
+
+    $response = $this->withHeaders($this->headers)
+        ->getJson("/api/device/{$this->device->device_id}/pending-transaction");
+
+    $response->assertOk()
+        ->assertJsonPath('has_pending', true)
+        ->assertJsonPath('transaction.id', $transaction->id);
+
+    $remaining = $response->json('transaction.remaining_seconds');
+
+    expect($transaction->fresh()->expires_at)->not->toBeNull()
+        ->and($remaining)->toBeInt()
+        ->and($remaining)->toBeGreaterThan(20)
+        ->and($remaining)->toBeLessThanOrEqual(30);
+});
+
+it('never expires a bill the console has not collected', function () {
+    $product = Product::where('name', 'Tahu Goreng')->first();
+    $transaction = Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => $product->price,
+        'status' => 'pending',
+        'items' => [],
+        'expires_at' => null,
+    ]);
+
+    $this->artisan('transactions:cancel-expired')->assertSuccessful();
+
+    expect($transaction->fresh()->status)->toBe('pending');
+});
+
 it('reports an expired pending transaction as no longer pending', function () {
     $product = Product::where('name', 'Tahu Goreng')->first();
     consolePendingTransaction($this->device, [[

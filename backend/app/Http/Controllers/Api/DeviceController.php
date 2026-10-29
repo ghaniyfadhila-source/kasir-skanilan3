@@ -77,6 +77,13 @@ class DeviceController extends Controller
         // The console has no clock (no NTP), so it cannot turn the absolute
         // expiry into a millis() deadline. remaining_seconds is the only field
         // the firmware needs to time a transaction out.
+        //
+        // Start that window now, on the first collection: a bill created while
+        // the console was offline must still be tappable when it reconnects.
+        if (! $transaction->expires_at) {
+            $transaction->update(['expires_at' => now()->addSeconds(30)]);
+        }
+
         $remainingSeconds = $transaction->expires_at
             ? max(0, (int) now()->diffInSeconds($transaction->expires_at, false))
             : null;

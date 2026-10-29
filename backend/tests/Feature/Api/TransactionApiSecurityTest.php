@@ -120,7 +120,8 @@ it('creates a pending transaction for the caller own console', function () {
 
     expect($transaction->device_id)->toEqual($this->device->id)
         ->and((float) $transaction->total)->toEqual(30000.0)
-        ->and($transaction->items[0]['qty'])->toEqual(2);
+        ->and($transaction->items[0]['qty'])->toEqual(2)
+        ->and($transaction->expires_at)->toBeNull();
 });
 
 it('refuses to open a transaction for another console', function () {

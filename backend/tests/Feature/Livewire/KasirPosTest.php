@@ -206,14 +206,14 @@ it('creates a pending transaction for the kasir device on checkout', function ()
         ->and($component->get('message'))->toEqual('Menunggu pembeli tap kartu...');
 });
 
-it('expires the pending transaction after the tap window', function () {
+it('waits for the console before starting the tap window', function () {
     Livewire::actingAs($this->kasir)->test(KasirPos::class)
         ->call('addToCart', $this->nasiGoreng->id)
         ->call('checkout');
 
     $transaction = Transaction::sole();
 
-    expect($transaction->expires_at)->not->toBeNull()
+    expect($transaction->expires_at)->toBeNull()
         ->and($transaction->isExpired())->toBeFalse();
 });
 
