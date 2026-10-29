@@ -18,9 +18,14 @@ class TransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $navigationGroup = 'Admin';
+    protected static ?string $navigationLabel = 'Riwayat Transaksi';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return auth()->user()?->hasRole('admin') ? 'Admin' : 'Kasir';
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -150,7 +155,16 @@ class TransactionResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
-            ->bulkActions([])
+            ->bulkActions(
+                auth()->user()?->hasRole('admin')
+                    ? [
+                        Tables\Actions\BulkActionGroup::make([
+                            Tables\Actions\DeleteBulkAction::make()
+                                ->label('Bersihkan riwayat'),
+                        ]),
+                    ]
+                    : []
+            )
             ->defaultSort('created_at', 'desc');
     }
 

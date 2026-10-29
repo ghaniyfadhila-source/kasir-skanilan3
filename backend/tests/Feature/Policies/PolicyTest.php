@@ -125,3 +125,15 @@ it('reserves deleting transactions for an admin', function () {
         ->and($this->admin->can('delete', $transaction))->toBeTrue()
         ->and($this->admin->can('view', $transaction))->toBeTrue();
 });
+
+it('lets only an admin manage user accounts', function () {
+    expect($this->admin->can('viewAny', User::class))->toBeTrue()
+        ->and($this->admin->can('create', User::class))->toBeTrue()
+        ->and($this->admin->can('update', $this->kasir))->toBeTrue()
+        ->and($this->admin->can('delete', $this->kasir))->toBeTrue()
+        ->and($this->admin->can('delete', $this->admin))->toBeFalse();
+
+    expect($this->kasir->can('viewAny', User::class))->toBeFalse()
+        ->and($this->kasir->can('create', User::class))->toBeFalse()
+        ->and($this->kasir->can('update', $this->otherKasir))->toBeFalse();
+});

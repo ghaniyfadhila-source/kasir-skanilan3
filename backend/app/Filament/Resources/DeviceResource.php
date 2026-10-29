@@ -48,7 +48,9 @@ class DeviceResource extends Resource
                     ->searchable()
                     ->preload()
                     ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} ({$record->email})")
-                    ->placeholder('Pilih kasir (optional)'),
+                    ->placeholder('Pilih kasir (optional)')
+                    ->unique(ignoreRecord: true)
+                    ->helperText('Satu kasir hanya boleh memiliki satu console.'),
             ]),
             Forms\Components\Section::make('Token & Status')->schema([
                 Forms\Components\TextInput::make('api_token')
