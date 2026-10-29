@@ -148,6 +148,21 @@ it('never expires a bill the console has not collected', function () {
     expect($transaction->fresh()->status)->toBe('pending');
 });
 
+it('cancels a bill whose tap window already elapsed', function () {
+    $product = Product::where('name', 'Tahu Goreng')->first();
+    $transaction = Transaction::create([
+        'device_id' => $this->device->id,
+        'total' => $product->price,
+        'status' => 'pending',
+        'items' => [],
+        'expires_at' => now()->subSecond(),
+    ]);
+
+    $this->artisan('transactions:cancel-expired')->assertSuccessful();
+
+    expect($transaction->fresh()->status)->toBe('cancelled');
+});
+
 it('reports an expired pending transaction as no longer pending', function () {
     $product = Product::where('name', 'Tahu Goreng')->first();
     consolePendingTransaction($this->device, [[

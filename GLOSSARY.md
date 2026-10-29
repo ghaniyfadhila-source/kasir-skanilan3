@@ -7,14 +7,15 @@
 | Term | Definition | Aliases / Not To Be Confused With |
 |------|------------|-----------------------------------|
 | **Device** | Hardware console (ESP8266 + RFID + LCD + Buzzer) yang dipasang di meja kasir. Identifikasi unik via `device_id` (MAC address). | ≠ "Console", ≠ "Terminal", ≠ "Reader" |
-| **Kasir** | User (penjual) yang login ke web POS, mengelola produk miliknya, dan memulai transaksi. Punya 1 akun + 1 device. | ≠ "Penjual" (role), ≠ "Admin" |
+| **Kasir** | User (penjual) yang login ke panel, mengelola produk miliknya, memantau console dan riwayat transaksinya, lalu memulai transaksi di POS. Punya 1 akun + 1 device. | ≠ "Penjual" (role), ≠ "Admin" |
+| **Panel Kasir** | Halaman Filament `/admin` yang dipakai bersama admin dan kasir. Kasir hanya melihat produk, transaksi, chart, dan status console miliknya; admin melihat semuanya. | ≠ "POS" (halaman checkout), ≠ "Admin Panel" (khusus admin) |
 | **Admin** | User dengan akses penuh: CRUD device, assign device ke kasir, monitoring semua transaksi, CRUD kartu RFID. | ≠ "Superadmin" |
 | **Pembeli** | Orang yang membeli, dibawa kartu RFID. Bisa siswa/guru/staff. Tidak punya login web. | ≠ "Customer", ≠ "User" |
 | **RFID Card** | Kartu fisik berisi UID unik. Saldo & status aktif disimpan di database (bukan di kartu). | ≠ "Kartu", ≠ "Tag", ≠ "E-Wallet" |
 | **Product** | Item yang dijual oleh satu kasir. Harga, stok, kategori per-kasir. | ≠ "Menu", ≠ "Item" (global) |
 | **Transaction** | Satu kali proses beli: kasir pilih produk → total → pembeli tap kartu → saldo dipotong → status success/failed/cancelled. | ≠ "Order", ≠ "Payment", ≠ "Sale" |
 | **Transaction Item** | Baris detail dalam transaksi: product_id, qty, price, subtotal. | ≠ "Line Item", ≠ "Order Detail" |
-| **Pending Transaction** | Transaksi status `pending` menunggu tap kartu (timeout 30 detik). | ≠ "Open Transaction" |
+| **Pending Transaction** | Transaksi status `pending` menunggu tap kartu. Jendela tap 30 detik baru mulai saat console pertama kali mengambil tagihan; selama console offline tagihan tetap pending tanpa batas otomatis. | ≠ "Open Transaction" |
 | **Device Token** | API token panjang (`dev_` + 64 hex) untuk autentikasi device ke backend. Disimpan di `devices.api_token`. | ≠ "API Key", ≠ "JWT" |
 | **Heartbeat** | Periodik kirim status device (RSSI, heap, uptime) ke backend tiap 30 detik. | ≠ "Ping", ≠ "Keep-alive" |
 
