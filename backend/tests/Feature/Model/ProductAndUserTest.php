@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Device;
 use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
@@ -71,9 +73,15 @@ it('resolves the console the kasir operates through kasir_id', function () {
         ->and($this->admin->device)->toBeNull();
 });
 
-it('keeps users.device_id pointing at the same console', function () {
-    expect($this->kasir->device_id)->toEqual($this->kasir->device->id)
-        ->and($this->admin->device_id)->toBeNull();
+it('rejects a second console for the same kasir', function () {
+    $this->expectException(QueryException::class);
+
+    Device::create([
+        'device_id' => 'ESP8266_SECOND_'.uniqid(),
+        'name' => 'Console Kedua',
+        'status' => 'active',
+        'kasir_id' => $this->kasir->id,
+    ]);
 });
 
 it('hashes the password and hides it from array output', function () {

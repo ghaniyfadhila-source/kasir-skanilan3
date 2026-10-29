@@ -18,7 +18,7 @@ class TransactionPolicy
             return true;
         }
 
-        return $user->hasRole('kasir') && $user->device_id === $transaction->device_id;
+        return $user->hasRole('kasir') && $user->device?->id === $transaction->device_id;
     }
 
     public function create(User $user): bool
@@ -28,11 +28,15 @@ class TransactionPolicy
 
     public function update(User $user, Transaction $transaction): bool
     {
-        if ($user->hasRole('admin')) {
-            return true;
-        }
+        // Transactions are the kasir's monitoring record: cancelling happens
+        // through the POS, editing belongs to admin only.
+        return $user->hasRole('admin');
+    }
 
-        return $user->hasRole('kasir') && $user->device_id === $transaction->device_id;
+    public function cancel(User $user, Transaction $transaction): bool
+    {
+        return $user->hasRole('admin')
+            || ($user->hasRole('kasir') && $user->device?->id === $transaction->device_id);
     }
 
     public function delete(User $user, Transaction $transaction): bool

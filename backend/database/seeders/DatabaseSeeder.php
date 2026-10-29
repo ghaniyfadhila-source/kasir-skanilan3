@@ -77,7 +77,7 @@ class DatabaseSeeder extends Seeder
     {
         $kasir = User::where('email', 'kasir@skanilan.local')->first();
 
-        $device = Device::firstOrCreate(
+        Device::firstOrCreate(
             ['device_id' => 'ESP8266_DEMO_001'],
             [
                 'name' => 'Console Kasir 1',
@@ -87,13 +87,6 @@ class DatabaseSeeder extends Seeder
                 'kasir_id' => $kasir?->id,
             ]
         );
-
-        // users.device_id mirrors the console the kasir operates from. The
-        // policies and the Filament transaction list filter on it, so leaving it
-        // null hides every transaction from the kasir.
-        if ($kasir && $kasir->device_id !== $device->id) {
-            $kasir->update(['device_id' => $device->id]);
-        }
     }
 
     private function createProducts(): void

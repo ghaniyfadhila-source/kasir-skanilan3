@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('device.{deviceId}', function ($user, string $deviceId) {
     if ($user instanceof User) {
-        return $user->devices()->where('device_id', $deviceId)->exists()
-            || $user->hasRole('admin');
+        return $user->hasRole('admin') || $user->device?->device_id === $deviceId;
     }
 
     if ($user instanceof Device) {

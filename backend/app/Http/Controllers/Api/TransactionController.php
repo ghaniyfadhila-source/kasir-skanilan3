@@ -72,7 +72,7 @@ class TransactionController extends Controller
 
     public function cancel(Request $request, Transaction $transaction)
     {
-        $this->authorize('update', $transaction);
+        $this->authorize('cancel', $transaction);
 
         if (! $transaction->isPending()) {
             return response()->json([

@@ -27,7 +27,7 @@ class TransactionResource extends Resource
         $query = parent::getEloquentQuery()->with(['device', 'rfidCard']);
 
         if (! auth()->user()?->hasRole('admin')) {
-            $query->where('device_id', auth()->user()->device_id);
+            $query->whereHas('device', fn (Builder $device) => $device->where('kasir_id', auth()->id()));
         }
 
         return $query;

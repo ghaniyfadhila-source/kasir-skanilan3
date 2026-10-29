@@ -103,9 +103,12 @@ it('scopes transaction access to the console of the kasir', function () {
 
     expect($this->kasir->can('viewAny', Transaction::class))->toBeTrue()
         ->and($this->kasir->can('view', $own))->toBeTrue()
-        ->and($this->kasir->can('update', $own))->toBeTrue()
+        ->and($this->kasir->can('update', $own))->toBeFalse()
         ->and($this->kasir->can('view', $foreign))->toBeFalse()
-        ->and($this->kasir->can('update', $foreign))->toBeFalse();
+        ->and($this->kasir->can('update', $foreign))->toBeFalse()
+        ->and($this->kasir->can('cancel', $own))->toBeTrue()
+        ->and($this->kasir->can('cancel', $foreign))->toBeFalse()
+        ->and($this->admin->can('update', $own))->toBeTrue();
 });
 
 it('reserves deleting transactions for an admin', function () {
