@@ -13,10 +13,10 @@ class AuthViewsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_page_renders_successfully(): void
+    public function test_login_page_redirects_to_the_panel_login(): void
     {
         $response = $this->get('/login');
-        $response->assertStatus(200);
+        $response->assertRedirect('/admin/login');
     }
 
     public function test_register_page_renders_successfully(): void

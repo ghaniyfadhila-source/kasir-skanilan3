@@ -18,6 +18,10 @@ linked to a cashier only by an admin.
   transactions, a revenue chart scoped to their console, the status of that
   console, and the built-in logout action. User management, devices, and RFID
   cards are admin-only.
+- **One login page.** Admin and kasir sign in at `/admin/login`, the Filament
+  panel login. `/login` redirects there and keeps the `login` route name for
+  Laravel's auth middleware. After signing in an admin lands on the dashboard
+  and a kasir lands on `/admin/pos`; logout always returns to `/admin/login`.
 - **The POS is a page inside the panel.** Kasir work at `/admin/pos`, which
   embeds the existing `KasirPos` Livewire component in embedded mode. The old
   `/kasir/pos` URL stays as a 301 redirect to the panel page, and the

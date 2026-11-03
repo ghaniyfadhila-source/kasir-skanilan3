@@ -44,10 +44,7 @@ it('treats the application host as a stateful domain', function () {
 });
 
 it('lets the POS browser poll the status with its login session', function () {
-    $this->post('/login', [
-        'email' => 'kasir@skanilan.local',
-        'password' => 'password123',
-    ]);
+    $this->actingAs($this->kasir);
 
     $this->withHeader('referer', config('app.url').'/admin/pos')
         ->getJson("/api/transactions/{$this->transaction->id}/status")

@@ -23,7 +23,7 @@ Route::get('/', function () {
         return redirect()->to(KasirPos::getUrl());
     }
 
-    return redirect()->route('login');
+    return redirect()->route('filament.admin.auth.login');
 });
 
 // The POS now lives inside the Filament panel. Keep the old URL and route name

@@ -37,6 +37,11 @@ kasirCashlessSkanilan/
 
 ## Fitur Utama
 
+### Autentikasi
+- Satu halaman login untuk admin dan kasir: `/admin/login` (Filament). `/login` dialihkan ke sana.
+- Admin mendarat di dashboard `/admin`; kasir mendarat di POS `/admin/pos`.
+- Logout kembali ke `/admin/login`.
+
 ### Admin Panel (Filament)
 - **Device Management**: CRUD device, assign ke kasir, reset token, monitor status online/offline
 - **Product Management**: Kasir CRUD produk sendiri (scoped ke device mereka)

@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Cache\RateLimiter;
+use App\Http\Responses\FilamentLoginResponse;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse as FilamentLoginResponseContract;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter as RateLimiterFacade;
@@ -12,8 +13,10 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // LoginRequest resolves the limiter through the 'limiter' alias.
-        $this->app->alias(RateLimiter::class, 'limiter');
+        $this->app->bind(
+            FilamentLoginResponseContract::class,
+            FilamentLoginResponse::class,
+        );
     }
 
     public function boot(): void
