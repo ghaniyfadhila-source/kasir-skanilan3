@@ -20,6 +20,8 @@ class KasirPos extends Page
 
     protected static string $view = 'filament.pages.kasir-pos';
 
+    protected ?string $subheading = 'Pilih menu, lalu minta pembeli tap kartu di console.';
+
     public static function canAccess(): bool
     {
         return auth()->user()?->hasRole('kasir') ?? false;
