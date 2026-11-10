@@ -12,7 +12,7 @@ class RevenueChart extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected function getData(): array
     {
@@ -41,8 +41,8 @@ class RevenueChart extends ChartWidget
                 [
                     'label' => 'Total (Rp)',
                     'data' => $totals,
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.5)',
-                    'borderColor' => 'rgb(245, 158, 11)',
+                    'backgroundColor' => 'rgba(45, 91, 255, 0.22)',
+                    'borderColor' => '#2D5BFF',
                     'fill' => true,
                     'tension' => 0.3,
                 ],

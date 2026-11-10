@@ -10,7 +10,7 @@ class DeviceStatusGrid extends Widget
 {
     protected static string $view = 'filament.widgets.device-status-grid';
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 1;
 
     protected static ?int $sort = 1;
 

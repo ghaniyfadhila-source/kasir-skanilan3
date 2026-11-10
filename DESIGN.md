@@ -83,7 +83,7 @@ components:
 
 **Creative North Star: "Schoolyard Sticker"**
 
-The canteen counter as a wall of stickers and rubber stamps: paper ground, thick ink outlines, hard offset shadows, bright red/blue/yellow signals. It should feel handmade and loud enough to read across a queue, but the loudness stops at the transaction status. The POS is the first shipped surface; the rest of the Filament panel still uses its default theme and is being rolled out phase by phase.
+The canteen counter as a wall of stickers and rubber stamps: paper ground, thick ink outlines, hard offset shadows, bright red/blue/yellow signals. It should feel handmade and loud enough to read across a queue, but the loudness stops at the transaction status. The POS is the first shipped surface. The rest of the Filament panel (login, dashboard, tables, forms, modals) now shares the same system through a panel-wide theme; see "Filament admin theme" below.
 
 The system borrows neobrutalism's directness, not its chaos. Every panel is a card with a visible edge. Every state is a stamped label. Nothing floats without a shadow, and no shadow is blurred.
 
@@ -182,6 +182,14 @@ The status panel behaves like a rubber stamp card:
 - **Failure:** red "Gagal" stamp; red X sticker; plain-language reason; green "Transaksi Baru" button.
 
 Stamps are the loudest element by design. The rest of the page stays readable around them.
+
+## Filament admin theme
+- Delivered as plain CSS (`resources/css/filament/admin/theme.css`) compiled by Vite, then injected after Filament's styles via a `PanelsRenderHook::STYLES_AFTER` hook. Filament's own compiled theme stays loaded underneath; the file only overrides and never re-compiles Tailwind.
+- Fonts are self-hosted (`@font-face` in the theme). `AdminPanelProvider::font()` sets the family and a no-op `SelfHostedFontProvider` stops Filament from emitting a Bunny CDN `<link>`.
+- Filament's RGB color scales are remapped to the brand palette: primary blue, warm gray ramp, and lifted primary/danger/warning/success shades under `.dark`. On-blue labels (`color: var(--nb-on-blue)`) flip cream/ink across modes so buttons and badges keep contrast.
+- Tables, forms, sections, badges, dropdowns, modals, pagination, and tabs all reuse the sticker language: `2px`/`3px` ink borders, `4px` radius, hard shadows, mono uppercase table headers.
+- The two hand-built dashboard widgets (`device-status-grid`, `live-transaction-feed`) were rewritten onto `nb-*` helpers instead of inline Tailwind, so they inherit tokens and dark mode for free.
+- On phones the Filament drawer auto-closes (same `Alpine.store('sidebar').close()` guard the POS uses) and the dim overlay is suppressed; the hamburger still opens it.
 
 ## Do's and Don'ts
 

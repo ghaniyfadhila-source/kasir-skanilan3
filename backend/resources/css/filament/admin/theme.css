@@ -1,0 +1,809 @@
+/* =========================================================================
+   Kasir Cashless — "Schoolyard Sticker" admin theme
+   Plain CSS, compiled by Vite, loaded via ->viteTheme().
+   Overrides Filament v3's compiled utilities. Tokens are shared with the POS
+   page (which keeps its own scoped copy for the counter).
+   ========================================================================= */
+
+@font-face {
+  font-family: 'Archivo Black';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/archivo-black-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/space-mono-400-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/space-mono-700-latin.woff2') format('woff2');
+}
+
+/* -------------------------------------------------------------------------
+   Brand tokens
+   ------------------------------------------------------------------------- */
+:root {
+  --nb-paper: #fff8e7;
+  --nb-surface: #fffdf7;
+  --nb-surface-2: #fff1c2;
+  --nb-ink: #0b0b0b;
+  --nb-ink-soft: #221f1a;
+  --nb-muted: #5b5346;
+  --nb-line: rgba(11, 11, 11, 0.16);
+  --nb-blue: #2d5bff;
+  --nb-blue-soft: #8fa6ff;
+  --nb-red: #ff4b3e;
+  --nb-red-ink: #a51c12;
+  --nb-yellow: #ffc93c;
+  --nb-green: #22c55e;
+  --nb-green-ink: #0b6b32;
+  --nb-on-blue: #fffdf7;
+  --nb-dot: rgba(11, 11, 11, 0.09);
+  --nb-shadow: 5px 5px 0 var(--nb-ink);
+  --nb-shadow-sm: 3px 3px 0 var(--nb-ink);
+  --nb-border: 3px solid var(--nb-ink);
+  --nb-border-2: 2px solid var(--nb-ink);
+  --nb-radius: 4px;
+  --nb-radius-sm: 3px;
+  --nb-display: 'Archivo Black', 'Arial Black', sans-serif;
+  --nb-ui: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --nb-mono: 'Space Mono', 'Consolas', monospace;
+}
+
+.dark {
+  --nb-paper: #141210;
+  --nb-surface: #1f1a16;
+  --nb-surface-2: #312815;
+  --nb-ink: #fff6e4;
+  --nb-ink-soft: #fff6e4;
+  --nb-muted: #c9bfae;
+  --nb-line: rgba(255, 246, 228, 0.16);
+  --nb-blue: #8fa6ff;
+  --nb-blue-soft: #8fa6ff;
+  --nb-red: #ff6b5e;
+  --nb-red-ink: #fca5a5;
+  --nb-yellow: #ffd75e;
+  --nb-green: #4ade80;
+  --nb-green-ink: #86efac;
+  --nb-on-blue: #141210;
+  --nb-dot: rgba(255, 246, 228, 0.07);
+  --nb-shadow: 4px 4px 0 var(--nb-ink);
+  --nb-shadow-sm: 3px 3px 0 var(--nb-ink);
+}
+
+/* -------------------------------------------------------------------------
+   Filament color scales (RGB triplets)
+   ------------------------------------------------------------------------- */
+:root {
+  --primary-50: 238 242 255;
+  --primary-100: 224 231 255;
+  --primary-200: 199 210 254;
+  --primary-300: 165 180 252;
+  --primary-400: 124 147 255;
+  --primary-500: 45 91 255;
+  --primary-600: 36 71 216;
+  --primary-700: 28 54 172;
+  --primary-800: 21 42 130;
+  --primary-900: 15 30 92;
+  --primary-950: 9 19 56;
+
+  --danger-50: 254 242 240;
+  --danger-100: 254 226 222;
+  --danger-200: 254 202 196;
+  --danger-300: 252 165 156;
+  --danger-400: 255 107 94;
+  --danger-500: 255 75 62;
+  --danger-600: 211 47 35;
+  --danger-700: 165 28 18;
+  --danger-800: 130 22 14;
+  --danger-900: 92 14 8;
+  --danger-950: 48 8 4;
+
+  --warning-50: 254 252 232;
+  --warning-100: 254 249 195;
+  --warning-200: 254 240 138;
+  --warning-300: 253 224 71;
+  --warning-400: 250 204 21;
+  --warning-500: 255 201 60;
+  --warning-600: 184 122 0;
+  --warning-700: 138 92 0;
+  --warning-800: 105 70 0;
+  --warning-900: 72 47 0;
+  --warning-950: 38 25 0;
+
+  --success-50: 240 253 244;
+  --success-100: 220 252 231;
+  --success-200: 186 247 208;
+  --success-300: 132 239 172;
+  --success-400: 74 222 128;
+  --success-500: 34 197 94;
+  --success-600: 22 163 74;
+  --success-700: 21 128 61;
+  --success-800: 22 101 52;
+  --success-900: 20 83 45;
+  --success-950: 5 46 22;
+
+  --info-50: 238 242 255;
+  --info-100: 224 231 255;
+  --info-200: 199 210 254;
+  --info-300: 165 180 252;
+  --info-400: 124 147 255;
+  --info-500: 45 91 255;
+  --info-600: 36 71 216;
+  --info-700: 28 54 172;
+  --info-800: 21 42 130;
+  --info-900: 15 30 92;
+  --info-950: 9 19 56;
+
+  --gray-50: 255 253 247;
+  --gray-100: 255 248 231;
+  --gray-200: 232 223 201;
+  --gray-300: 214 201 172;
+  --gray-400: 167 152 124;
+  --gray-500: 122 110 92;
+  --gray-600: 91 83 70;
+  --gray-700: 63 58 50;
+  --gray-800: 38 35 32;
+  --gray-900: 31 26 22;
+  --gray-950: 11 11 11;
+}
+
+/* Filament's dark: variants rely on the same scale, so lift the loud colors
+   for dark surfaces and keep gray as a single warm ramp. */
+.dark {
+  --primary-300: 165 180 252;
+  --primary-400: 143 166 255;
+  --primary-500: 143 166 255;
+  --primary-600: 178 194 255;
+  --danger-400: 255 107 94;
+  --danger-500: 255 107 94;
+  --danger-600: 255 138 128;
+  --warning-400: 255 215 94;
+  --warning-500: 255 215 94;
+  --warning-600: 255 229 138;
+  --success-400: 74 222 128;
+  --success-500: 74 222 128;
+  --success-600: 125 229 165;
+}
+
+/* -------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------- */
+html {
+  --font-family: var(--nb-ui) !important;
+}
+
+.fi-body {
+  background-color: var(--nb-paper);
+  background-image: radial-gradient(var(--nb-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--nb-ink);
+  font-family: var(--nb-ui);
+}
+
+.fi-main,
+.fi-main-ctn,
+.fi-page {
+  background-color: transparent !important;
+}
+
+.fi-body .bg-white {
+  background-color: var(--nb-surface);
+}
+.dark .fi-body .bg-white {
+  background-color: var(--nb-surface);
+}
+
+::selection {
+  background: var(--nb-yellow);
+  color: var(--nb-ink);
+}
+
+/* Display voice for page headings and brand labels. */
+.fi-header-heading,
+.fi-simple-header h1,
+.fi-logo {
+  font-family: var(--nb-display);
+  letter-spacing: -0.02em;
+}
+.fi-header-heading {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1;
+  color: var(--nb-ink);
+}
+.fi-header-subheading {
+  color: var(--nb-muted);
+}
+.fi-breadcrumbs {
+  font-family: var(--nb-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fi-breadcrumbs a,
+.fi-breadcrumbs li {
+  color: var(--nb-muted);
+}
+
+a {
+  color: var(--nb-blue);
+}
+
+/* -------------------------------------------------------------------------
+   Layout chrome
+   ------------------------------------------------------------------------- */
+.fi-topbar nav,
+.fi-topbar {
+  background: var(--nb-paper);
+  border-bottom: var(--nb-border);
+  box-shadow: none;
+}
+.fi-sidebar {
+  background: var(--nb-paper);
+  border-right: var(--nb-border);
+}
+.fi-sidebar-header {
+  background: var(--nb-paper);
+  border-bottom: var(--nb-border);
+  box-shadow: none;
+}
+.fi-logo {
+  color: var(--nb-ink);
+}
+
+.fi-sidebar-group-label {
+  color: var(--nb-muted);
+  font-family: var(--nb-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.fi-sidebar-item-label {
+  color: var(--nb-ink);
+}
+.fi-sidebar-item-icon {
+  color: var(--nb-muted);
+}
+.fi-sidebar-item-button {
+  border: 2px solid transparent;
+  border-radius: var(--nb-radius-sm);
+}
+.fi-sidebar-item-button:hover {
+  background: var(--nb-surface-2);
+  border-color: var(--nb-ink);
+}
+.fi-sidebar-item-active .fi-sidebar-item-button {
+  background: var(--nb-blue);
+  border-color: var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+}
+.fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar-item-active .fi-sidebar-item-icon {
+  color: var(--nb-on-blue) !important;
+}
+
+/* Filament's mobile drawer leaves a dim overlay behind; the theme closes the
+   sidebar on phones in a script, so the overlay is never needed. */
+.fi-sidebar-close-overlay {
+  display: none !important;
+}
+
+/* -------------------------------------------------------------------------
+   Sections / panels
+   ------------------------------------------------------------------------- */
+.fi-section {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+.fi-section-header {
+  border-bottom: var(--nb-border-2);
+}
+.fi-section-header h3,
+.fi-section-header h2 {
+  font-family: var(--nb-display);
+  letter-spacing: -0.01em;
+}
+.fi-section-content {
+  padding: 1.25rem;
+}
+
+/* -------------------------------------------------------------------------
+   Stats overview
+   ------------------------------------------------------------------------- */
+.fi-wi-stats-overview-stat {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+.fi-wi-stats-overview-stat-label {
+  color: var(--nb-muted);
+  font-family: var(--nb-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.fi-wi-stats-overview-stat-value {
+  font-family: var(--nb-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--nb-ink);
+}
+.fi-wi-stats-overview-stat-description {
+  font-size: 0.82rem;
+}
+/* Sticky-note accent on the ledger stat. */
+.fi-wi-stats-overview-stat:nth-child(1) {
+  background: var(--nb-surface-2);
+}
+
+/* -------------------------------------------------------------------------
+   Tables
+   ------------------------------------------------------------------------- */
+.fi-ta-ctn {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+.fi-ta-header-ctn {
+  border-bottom: var(--nb-border-2);
+}
+.fi-ta-table thead tr {
+  background: var(--nb-surface) !important;
+  border-bottom: var(--nb-border-2);
+}
+.fi-ta-table {
+  border-color: var(--nb-line);
+}
+.fi-ta-table tbody tr {
+  border-bottom: 1px solid var(--nb-line);
+}
+.fi-ta-table tbody tr:hover {
+  background: var(--nb-surface-2);
+}
+.fi-ta-header-cell-label {
+  font-family: var(--nb-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nb-muted);
+}
+.fi-ta-cell {
+  color: var(--nb-ink);
+}
+.fi-ta-actions-cell .fi-link {
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: var(--nb-shadow-sm);
+  background: var(--nb-surface);
+  color: var(--nb-ink);
+  padding: 0.3rem 0.55rem;
+}
+.fi-ta-actions-cell .fi-link:hover {
+  background: var(--nb-blue);
+  color: var(--nb-on-blue);
+}
+.fi-ta-actions-cell .fi-link.fi-color-danger {
+  background: var(--nb-red);
+  color: #0b0b0b;
+}
+.fi-ta-actions-cell .fi-link.fi-color-danger:hover {
+  background: var(--nb-red);
+  color: #0b0b0b;
+}
+
+/* -------------------------------------------------------------------------
+   Forms / inputs
+   ------------------------------------------------------------------------- */
+.fi-input-wrp,
+.fi-select-wrp,
+.fi-fo-text-input,
+.fi-fo-select {
+  background: var(--nb-surface);
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: none;
+}
+.fi-input-wrp:focus-within,
+.fi-select-wrp:focus-within {
+  box-shadow: none;
+  outline: 3px solid var(--nb-blue);
+  outline-offset: 1px;
+}
+.fi-input,
+.fi-select-input,
+.fi-textarea,
+textarea,
+select.fi-input,
+input.fi-input {
+  color: var(--nb-ink);
+  background: transparent;
+}
+.fi-input::placeholder,
+textarea::placeholder {
+  color: var(--nb-muted);
+}
+.fi-fo-field-wrp-label {
+  color: var(--nb-ink);
+  font-weight: 700;
+}
+
+/* Toggle + check + radio receive a hard ink outline. */
+.fi-toggle-input,
+.fi-checkbox-input,
+input[type='checkbox'] {
+  border: 2px solid var(--nb-ink);
+  color: var(--nb-blue);
+}
+.fi-checkbox-input {
+  border-radius: var(--nb-radius-sm);
+}
+
+/* File upload rows. */
+.fi-fo-file-upload {
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius);
+  background: var(--nb-surface);
+}
+
+/* -------------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------------- */
+.fi-btn,
+.fi-icon-btn {
+  border-radius: var(--nb-radius-sm);
+  font-family: var(--nb-ui);
+  font-weight: 700;
+}
+.fi-btn {
+  border: var(--nb-border-2);
+  box-shadow: var(--nb-shadow-sm);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.08s ease;
+}
+.fi-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--nb-ink);
+}
+.fi-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--nb-ink);
+}
+
+.fi-btn-color-primary {
+  background: var(--nb-blue) !important;
+  color: var(--nb-on-blue) !important;
+}
+.fi-btn-color-danger {
+  background: var(--nb-red) !important;
+  color: #0b0b0b !important;
+}
+.fi-btn-color-success {
+  background: var(--nb-green) !important;
+  color: #0b0b0b !important;
+}
+.fi-btn-color-warning {
+  background: var(--nb-yellow) !important;
+  color: #0b0b0b !important;
+}
+.fi-btn-color-info {
+  background: var(--nb-blue) !important;
+  color: var(--nb-on-blue) !important;
+}
+.fi-btn-color-gray {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+}
+
+.fi-icon-btn {
+  border: var(--nb-border-2);
+  background: var(--nb-surface);
+  color: var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+}
+.fi-icon-btn:hover {
+  background: var(--nb-surface-2);
+}
+.fi-sidebar .fi-icon-btn {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--nb-muted);
+}
+.fi-sidebar .fi-icon-btn:hover {
+  background: var(--nb-surface-2);
+  color: var(--nb-ink);
+}
+
+/* -------------------------------------------------------------------------
+   Badges / chips
+   ------------------------------------------------------------------------- */
+.fi-badge {
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: 2px 2px 0 var(--nb-ink);
+  font-family: var(--nb-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fi-badge.fi-color-primary,
+.fi-badge.fi-color-info {
+  background: var(--nb-blue) !important;
+  color: var(--nb-on-blue) !important;
+}
+.fi-badge.fi-color-danger {
+  background: var(--nb-red) !important;
+  color: #0b0b0b !important;
+}
+.fi-badge.fi-color-success {
+  background: var(--nb-green) !important;
+  color: #0b0b0b !important;
+}
+.fi-badge.fi-color-warning {
+  background: var(--nb-yellow) !important;
+  color: #0b0b0b !important;
+}
+.fi-badge.fi-color-gray {
+  background: var(--nb-surface);
+  color: var(--nb-ink);
+}
+
+/* -------------------------------------------------------------------------
+   Dropdowns, modals, notifications
+   ------------------------------------------------------------------------- */
+.fi-dropdown-panel {
+  background: var(--nb-surface);
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: var(--nb-shadow-sm);
+}
+.fi-dropdown-list-item:hover {
+  background: var(--nb-surface-2);
+}
+.fi-modal-window {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+.fi-modal-header {
+  border-bottom: var(--nb-border-2);
+}
+.fi-modal-footer {
+  border-top: var(--nb-border-2);
+}
+.fi-modal-heading {
+  font-family: var(--nb-display);
+  letter-spacing: -0.01em;
+}
+.fi-no-notification-wrp {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+
+/* -------------------------------------------------------------------------
+   Pagination, tabs, avatars
+   ------------------------------------------------------------------------- */
+.fi-pagination-item {
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--nb-radius-sm);
+  background: var(--nb-surface);
+  box-shadow: var(--nb-shadow-sm);
+  color: var(--nb-ink);
+}
+.fi-pagination-item:hover {
+  background: var(--nb-surface-2);
+}
+.fi-pagination-item-active {
+  background: var(--nb-blue);
+  color: var(--nb-on-blue);
+}
+
+.fi-tabs-item-active {
+  background: var(--nb-blue);
+  color: var(--nb-on-blue);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: var(--nb-shadow-sm);
+}
+
+.fi-avatar {
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius-sm);
+}
+
+/* -------------------------------------------------------------------------
+   Login (simple layout)
+   ------------------------------------------------------------------------- */
+.fi-simple-layout {
+  background-color: var(--nb-paper);
+  background-image: radial-gradient(var(--nb-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--nb-ink);
+}
+.fi-simple-main {
+  background: var(--nb-surface);
+  border: var(--nb-border);
+  border-radius: var(--nb-radius);
+  box-shadow: var(--nb-shadow);
+}
+.fi-simple-header h1 {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--nb-ink);
+}
+.fi-simple-header .fi-logo {
+  font-size: 1.1rem;
+}
+.fi-simple-main .fi-input-wrp {
+  background: var(--nb-surface);
+}
+
+/* -------------------------------------------------------------------------
+   Custom dashboard widgets (nb-* helpers)
+   ------------------------------------------------------------------------- */
+.nb-device-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+@media (min-width: 1536px) {
+  .nb-device-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.nb-device {
+  display: block;
+  background: var(--nb-surface);
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: var(--nb-shadow-sm);
+  padding: 0.9rem;
+  color: var(--nb-ink);
+  text-decoration: none;
+}
+.nb-device:hover {
+  background: var(--nb-surface-2);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--nb-ink);
+}
+.nb-device-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.nb-device-name {
+  font-family: var(--nb-display);
+  font-size: 0.85rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nb-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.45rem;
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: 2px 2px 0 var(--nb-ink);
+  font-family: var(--nb-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nb-chip-green {
+  background: var(--nb-green);
+  color: #0b0b0b;
+}
+.nb-chip-red {
+  background: var(--nb-red);
+  color: #0b0b0b;
+}
+.nb-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 0 2px var(--nb-surface);
+}
+.nb-device dl {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+.nb-device .nb-kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.nb-device .nb-kv dt {
+  flex: none;
+  color: var(--nb-muted);
+}
+.nb-device .nb-kv dd {
+  min-width: 0;
+  flex: 1;
+  font-family: var(--nb-mono);
+  font-size: 0.76rem;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nb-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--nb-muted);
+}
+
+.nb-feed {
+  display: grid;
+  gap: 0.6rem;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+.nb-feed-item {
+  background: var(--nb-surface);
+  border: var(--nb-border-2);
+  border-radius: var(--nb-radius-sm);
+  box-shadow: var(--nb-shadow-sm);
+  padding: 0.75rem;
+}
+.nb-feed-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+.nb-feed-total {
+  font-family: var(--nb-display);
+  color: var(--nb-ink);
+}
+.nb-feed-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--nb-muted);
+}
+.nb-feed-row span:last-child {
+  font-family: var(--nb-mono);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fi-btn:hover,
+  .nb-device:hover {
+    transform: none;
+  }
+}
